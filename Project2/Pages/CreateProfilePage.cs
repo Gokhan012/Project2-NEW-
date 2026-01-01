@@ -42,7 +42,6 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                                     .Text("Doğum Tarihi")
                                     .TextColor(Colors.White)
                                     .FontSize(14),
-                                    
 
                                 new Border()
                                     .Stroke(Colors.White)
@@ -54,16 +53,15 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                                             .HeightRequest(45)
                                             .MinimumDate(new DateTime(1950, 1, 1))
                                             .MaximumDate(DateTime.Now)
-                                            .Bind(DatePicker.DateProperty, nameof(CreateProfilePageWiew.BirthDate))
                                     )
                             }
                         },
 
                         // BOY (Entry)
-                        CreateInputGroup("Boy (cm)",nameof(CreateProfilePageWiew.Height),Keyboard.Numeric), // Boy için Label,Border,Entry içeren elemanları oluşturur.
+                        CreateInputGroup("Boy (cm)"), // Boy için Label,Border,Entry içeren elemanları oluşturur.
                         
                         // KİLO (Entry)
-                        CreateInputGroup("Kilo (kg)",nameof(CreateProfilePageWiew.Weight),Keyboard.Numeric), // Kilo için Label,Border,Entry içeren elemanları oluşturur.
+                        CreateInputGroup("Kilo (kg)"), // Kilo için Label,Border,Entry içeren elemanları oluşturur.
 
                         // CİNSİYET BAŞLIĞI
                         new Label() // Etiket
@@ -90,8 +88,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                                     .BackgroundColor(Colors.Transparent) // Buton arka planı şeffaf.
                                     .BorderColor(Colors.White) // Butonun çerçevesi beyaz.
                                     .BorderWidth(1) // Çerçeve kalınlığı 1 px.
-                                    .Column(0) // Butonu Gridin 0. sutünuna yerleştirir.(sola)
-                                    .Bind(Button.CommandProperty,nameof(CreateProfilePageWiew.SetFemaleGenderCommand)), // Butona tıklanınca ViewModeldeki SetFemaleGenderCommand komutunu çalıştırır.
+                                    .Column(0), // Butonu Gridin 0. sutünuna yerleştirir.(sola)
 
                                 new Button() // Buton
                                     .Text("Erkek") // Buton üzerinde Erkek yazısı.
@@ -100,7 +97,6 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                                     .BorderColor(Colors.White) // Butonun çerçevesi beyaz.
                                     .BorderWidth(1) // Çerçeve kalınlığı 1 px.
                                     .Column(1) // Butonu Gridin 1. sutünuna yerleştirir.(sağa)
-                                    .Bind(Button.CommandProperty,nameof(CreateProfilePageWiew.SetMaleGenderCommand)), // Butona tıklanınca ViewModeldeki SetMaleGenderCommand komutunu çalıştırır.
                             }
                         },
 
@@ -152,7 +148,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
     }
 
     // Ortak Input Grubu Metodu
-    private View CreateInputGroup(string title, string bindingPath, Keyboard keyboardType = null) // Kod tekrarını azaltan metot.
+    private View CreateInputGroup(string title) // Kod tekrarını azaltan metot.
     {
         return new VerticalStackLayout() // Dikey Yerleşim. İçindeki elemanları üstten alta dizer.
         {
@@ -172,8 +168,6 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                         new Entry() // Kullanıcıdan giriş almak için çerçeve içine koyulan eleman.
                             .TextColor(Colors.White) // Yazı beyaz renk.
                             .BackgroundColor(Colors.Transparent) // Entry arka planı şeffaf.
-                            .Bind(Entry.TextProperty,bindingPath)
-                            .Keyboard(keyboardType?? Keyboard.Default) // İkinci parametre ile klavye tipi belirlenir.
                             .HeightRequest(45) // Entry yüksekliği 40 px.
                             .Keyboard(Keyboard.Numeric) // Boy/Kilo için sayısal klavye açar.
                     )

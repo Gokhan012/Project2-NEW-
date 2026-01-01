@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NodaTime;
 using Project2.Services;
 
 namespace Project2.WiewModels
@@ -8,48 +7,13 @@ namespace Project2.WiewModels
     partial class CreateProfilePageWiew : ObservableObject
     {
         [ObservableProperty]
+        private int age;
+        [ObservableProperty]
         private double weight;
         [ObservableProperty]
         private double height;
         [ObservableProperty]
-        private int gender = 2;
-        // 1. Kullanıcının seçtiği doğum tarihi
-        [ObservableProperty]
-        private DateTime _birthDate = DateTime.Now; // Başlangıçta bugünün tarihi olsun
-
-        // 2. Ekranda görünecek Yaş
-        [ObservableProperty]
-        private int _age;
-
-        // 3. Yaşı Hesaplayan Metot
-        // (Bu metodu 'Hesapla' butonuna veya tarih değiştiğinde tetikleyebilirsin)
-        [RelayCommand]
-        public void CalculateAge()
-        {
-            var today = DateTime.Today; // Bugünün tarihi
-            var age = today.Year - BirthDate.Year; // Yıl farkını al
-
-            // Eğer doğum günü henüz gelmediyse yaşı 1 düşür
-            if (BirthDate.Date > today.AddYears(-age))
-            {
-                age--;
-            }
-
-            Age = age; // Hesaplanan yaşı değişkene ata (Ekranda otomatik güncellenir)
-        }
-
-        [RelayCommand]
-        public async Task SetFemaleGender()
-        {
-            Gender = 1;// Kadın
-        }
-
-        [RelayCommand]
-        public async Task SetMaleGender()
-        {
-            Gender = 0;// Erkek
-        }
-
+        private int gender;
 
         [RelayCommand]
         public async Task Profile()
