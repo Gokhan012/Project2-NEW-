@@ -1,74 +1,80 @@
 ﻿using FmgLib.MauiMarkup;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Layouts;
+using Project2.WiewModels;
+using static Microsoft.Maui.GridLength;
 
 namespace Project2.Pages;
 
 public class CalendarMainPage : ContentPage
 {
+    private CalendarMainPageWiew _viewModel;
+    private Grid _calendarGrid;
+
     public CalendarMainPage()
     {
+        _viewModel = new CalendarMainPageWiew();
+        BindingContext = _viewModel;
+
         this.BackgroundColor(Color.FromArgb("#23222E"));
+
+        _viewModel.PropertyChanged += (sender, e) =>
+        {
+            if (e.PropertyName == nameof(CalendarMainPageWiew.CurrentDate) ||
+                e.PropertyName == nameof(CalendarMainPageWiew.SelectedDate))
+            {
+                RenderCalendar();
+            }
+        };
 
         Content = new Grid()
         {
             Padding = new Thickness(20, 40, 20, 20),
             RowDefinitions =
             {
-                new RowDefinition(GridLength.Auto), // 0: Üst Başlık
-                new RowDefinition(GridLength.Auto), // 1: Takvim Izgarası
-                new RowDefinition(GridLength.Star), // 2: Etkinlik Listesi
-                new RowDefinition(GridLength.Auto)  // 3: Alt Navigasyon
+                new RowDefinition(GridLength.Auto),
+                new RowDefinition(GridLength.Auto),
+                new RowDefinition(GridLength.Star),
+                new RowDefinition(GridLength.Auto)
             },
             Children =
             {
                 // 0: ÜST BAŞLIK
                 new Grid()
                 {
-                    // Grid'i tek parça bırakıyoruz, içindeki elemanları HorizontalOptions ile dağıtıyoruz
                     Children = {
-                        // 1. SOLDA: "Takvim" Yazısı
-                        new Label()
-                            .Text("Takvim")
-                            .TextColor(Colors.White)
-                            .FontSize(20)
-                            .FontAttributes(FontAttributes.Bold)
-                            .HorizontalOptions(LayoutOptions.Start)
-                            .CenterVertical(),
+                        new Label().Text("Takvim").TextColor(Colors.White).FontSize(20).FontAttributes(FontAttributes.Bold)
+                            .HorizontalOptions(LayoutOptions.Start).CenterVertical(),
 
-                            // 2. TAM ORTADA: "Aralık 2025" BURADA KULLANICI TARİHİ DEĞİŞTİREBİLMELİ.(sağ ve sol oklarla vb.)
-                        new Label()
-                            .Text("Aralık 2025")
-                            .TextColor(Colors.White)
-                            .FontSize(18)
-                            .HorizontalOptions(LayoutOptions.Center)
-                            .CenterVertical(),
+                        new HorizontalStackLayout()
+                        {
+                            Spacing = 15,
+                            HorizontalOptions = LayoutOptions.Center,
+                            Children =
+                            {
+                                new Label().Text("◀").TextColor(Colors.Gray).FontSize(18).Padding(10).BackgroundColor(Colors.Transparent).CenterVertical()
+                                    .GestureRecognizers(new TapGestureRecognizer().Bind(TapGestureRecognizer.CommandProperty, nameof(CalendarMainPageWiew.PreviousMonthCommand))),
 
-                        // 3. SAĞDA: İkonlar (Arama ve Ekleme)
+                                new Label().TextColor(Colors.White).FontSize(18).CenterVertical()
+                                    .Bind(Label.TextProperty, nameof(CalendarMainPageWiew.CurrentMonthYearText)),
+
+                                new Label().Text("▶").TextColor(Colors.Gray).FontSize(18).Padding(10).BackgroundColor(Colors.Transparent).CenterVertical()
+                                    .GestureRecognizers(new TapGestureRecognizer().Bind(TapGestureRecognizer.CommandProperty, nameof(CalendarMainPageWiew.NextMonthCommand))),
+                            }
+                        }.Column(1),
+
                         new HorizontalStackLayout()
                         {
                             Spacing = 15,
                             Children = {
-                                new Label()
-                                    .Text("🔍") // ARAMA ŞUAN ÇALIŞMIYOR.
-                                    .FontSize(22)
-                                    .CenterVertical(),
-                                new Label()
-                                    .Text("+")
-                                    .TextColor(Color.FromArgb("#00FF85"))
-                                    .FontSize(30)
-                                    .FontAttributes(FontAttributes.Bold)
-                                    .CenterVertical()
-                                    .GestureRecognizers(new TapGestureRecognizer() // Takvime öğe eklemek için basılır.
-                                    {
-                                        Command = new Command(async () => await Navigation.PushAsync(new AddCalendarEventPage()))
-                                    }),
+                                new Label().Text("🔍").FontSize(22).CenterVertical(),
+                                new Label().Text("+").TextColor(Color.FromArgb("#00FF85")).FontSize(30).FontAttributes(FontAttributes.Bold).CenterVertical()
+                                    .GestureRecognizers(new TapGestureRecognizer().Command(new Command(async () => await Navigation.PushAsync(new AddCalendarEventPage()))))
                             }
-                        }
-                        .HorizontalOptions(LayoutOptions.End)
-                        .CenterVertical()
-                        }
+                        }.HorizontalOptions(LayoutOptions.End).CenterVertical()
+                    }
                 }.Row(0).Margin(new Thickness(0, 0, 0, 15)),
 
                 // 1: TAKVİM BÖLÜMÜ
@@ -76,33 +82,42 @@ public class CalendarMainPage : ContentPage
                 {
                     Spacing = 5,
                     Children = {
-                        // Gün İsimleri Satırı
                         new Grid() {
                             ColumnDefinitions =
                             {
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star)
+                                new ColumnDefinition(Star), new ColumnDefinition(Star), new ColumnDefinition(Star),
+                                new ColumnDefinition(Star), new ColumnDefinition(Star), new ColumnDefinition(Star), new ColumnDefinition(Star)
                             },
                             Children = {
-                                new Label().Text("Pzt").TextColor(Colors.White).FontSize(10).HorizontalOptions(LayoutOptions.Center).Column(0),
-                                new Label().Text("Sal").TextColor(Colors.White).FontSize(10).HorizontalOptions(LayoutOptions.Center).Column(1),
-                                new Label().Text("Çar").TextColor(Colors.White).FontSize(10).HorizontalOptions(LayoutOptions.Center).Column(2),
-                                new Label().Text("Per").TextColor(Colors.White).FontSize(10).HorizontalOptions(LayoutOptions.Center).Column(3),
-                                new Label().Text("Cum").TextColor(Colors.White).FontSize(10).HorizontalOptions(LayoutOptions.Center).Column(4),
-                                new Label().Text("Cmt").TextColor(Colors.White).FontSize(10).HorizontalOptions(LayoutOptions.Center).Column(5),
-                                new Label().Text("Paz").TextColor(Colors.White).FontSize(10).HorizontalOptions(LayoutOptions.Center).Column(6)
+                                new Label().Text("Pzt").TextColor(Colors.White).FontSize(10).CenterHorizontal().Column(0),
+                                new Label().Text("Sal").TextColor(Colors.White).FontSize(10).CenterHorizontal().Column(1),
+                                new Label().Text("Çar").TextColor(Colors.White).FontSize(10).CenterHorizontal().Column(2),
+                                new Label().Text("Per").TextColor(Colors.White).FontSize(10).CenterHorizontal().Column(3),
+                                new Label().Text("Cum").TextColor(Colors.White).FontSize(10).CenterHorizontal().Column(4),
+                                new Label().Text("Cmt").TextColor(Colors.White).FontSize(10).CenterHorizontal().Column(5),
+                                new Label().Text("Paz").TextColor(Colors.White).FontSize(10).CenterHorizontal().Column(6)
                             }
                         },
-                        CreateFullCalendarGrid()
+
+                        new Grid()
+                        {
+                            RowSpacing = 5,
+                            ColumnSpacing = 5,
+                            ColumnDefinitions =
+                            {
+                                new ColumnDefinition(Star), new ColumnDefinition(Star), new ColumnDefinition(Star),
+                                new ColumnDefinition(Star), new ColumnDefinition(Star), new ColumnDefinition(Star), new ColumnDefinition(Star)
+                            },
+                            RowDefinitions =
+                            {
+                                new RowDefinition(50), new RowDefinition(50), new RowDefinition(50),
+                                new RowDefinition(50), new RowDefinition(50), new RowDefinition(50)
+                            }
+                        }.Assign(out _calendarGrid)
                     }
                 }.Row(1),
 
-                // 2: Etkinlik Listesi KULLANICI TAKVİMDEN HÜCRE SEÇEBİLMELİ VE O HÜCRENİN TARİHİ 9 ARALIK YERİNE YAZMALI.
+                // 2: ETKİNLİK LİSTESİ (SEÇİLİ GÜN YAZISI BURADA)
                 new ScrollView()
                 {
                     Content = new VerticalStackLayout()
@@ -110,44 +125,33 @@ public class CalendarMainPage : ContentPage
                         Spacing = 10,
                         Padding = new Thickness(0, 15),
                         Children = {
-                            new Label().
-                                Text("9 Aralık Salı") // İLGİLİ GÜNÜN TARİHİ YAZMALI
+                            // 👇 GÜNCELLENDİ: Burası artık ViewModel'deki SelectedDateText'e bağlı
+                            new Label()
                                 .TextColor(Colors.White)
                                 .FontSize(18)
                                 .FontAttributes(FontAttributes.Bold)
-                                .Margin(new Thickness(0, 0, 0, 5)),
-                            new Label()
-                                .Text("Henüz bir etkinlik eklenmedi.\nEtkinlik eklemek için sağ üstteki + butonuna basın.")
-                                .TextColor(Colors.Gray)
-                                .FontSize(14)
-                                .Margin(new Thickness(0, 10, 0, 0))
+                                .Margin(new Thickness(0, 0, 0, 5))
+                                .Bind(Label.TextProperty, nameof(CalendarMainPageWiew.SelectedDateText)),
+
+                            new Label().Text("Henüz bir etkinlik eklenmedi.").TextColor(Colors.Gray).FontSize(14).Margin(new Thickness(0, 10, 0, 0))
                         }
                     }
                 }.Row(2),
 
                 // 3: ALT NAVİGASYON
                 new Border()
-                    .Stroke(Colors.White)
-                    .StrokeThickness(1)
-                    .Margin(new Thickness(-20, 0))
-                    .Padding(new Thickness(0, 10))
+                    .Stroke(Colors.White).StrokeThickness(1).Margin(new Thickness(-20, 0)).Padding(new Thickness(0, 10))
                     .Content(
                         new Grid()
                         {
                             ColumnDefinitions =
                             {
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star)
+                                new ColumnDefinition(Star), new ColumnDefinition(Star),
+                                new ColumnDefinition(Star), new ColumnDefinition(Star)
                             },
                             Children = {
-                                CreateNavTab("🏠", "Ana Sayfa", 0)
-                                .GestureRecognizers(new TapGestureRecognizer()
-                                {
-                                    Command = new Command(async () => await Navigation.PushAsync(new MainDashboardPage()))
-                                }),
-                                CreateNavTab("📅", "Takvim", 1, true), // Takvim aktif sekme
+                                CreateNavTab("🏠", "Ana Sayfa", 0).GestureRecognizers(new TapGestureRecognizer() { Command = new Command(async () => await Navigation.PushAsync(new MainDashboardPage())) }),
+                                CreateNavTab("📅", "Takvim", 1, true),
                                 CreateNavTab("💰", "Bütçe", 2),
                                 CreateNavTab("❤️", "Sağlık", 3)
                             }
@@ -155,76 +159,70 @@ public class CalendarMainPage : ContentPage
                     ).Row(3)
             }
         };
+
+        RenderCalendar();
     }
-    // Takvimin hücrelerini oluşturma
-    private View CreateFullCalendarGrid()
+
+    private void RenderCalendar()
     {
-        var grid = new Grid()
-        {
-            RowSpacing = 1,
-            ColumnSpacing = 1,
-            ColumnDefinitions =
-            {
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Star)
-            },
-            RowDefinitions =
-            {
-                new RowDefinition(70),
-                new RowDefinition(70),
-                new RowDefinition(70),
-                new RowDefinition(70),
-                new RowDefinition(70)
-            }
-        };
+        if (_calendarGrid == null) return;
+        _calendarGrid.Children.Clear();
 
-        for (int i = 0; i < 31; i++)
-        {
-            int day = i + 1;
-            int row = i / 7;
-            int col = i % 7;
+        DateTime currentMonth = _viewModel.CurrentDate;
+        int daysInMonth = DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month);
+        DateTime firstDay = new DateTime(currentMonth.Year, currentMonth.Month, 1);
+        int startOffset = ((int)firstDay.DayOfWeek + 6) % 7;
 
-            // Hücre içeriği sadece gün numarasından oluşuyor. KULLANICI ÖĞE EKLERSE ÖĞENİN SİMGESİ HÜCRE İÇİNDE OLMALI.
+        int row = 0;
+        int col = startOffset;
+
+        for (int day = 1; day <= daysInMonth; day++)
+        {
+            DateTime dateOfCell = new DateTime(currentMonth.Year, currentMonth.Month, day);
+            bool isSelected = dateOfCell.Date == _viewModel.SelectedDate.Date;
+            bool isToday = dateOfCell.Date == DateTime.Today;
+
+            // 👇 GÜNCELLENDİ: Yazı rengini ayarladık (Mor üstünde beyaz yazı iyidir)
             var cellContent = new Grid();
-
-            // Gün Numarası (Sol Üst)
             cellContent.Children.Add(new Label()
-                .Text(day.ToString()).TextColor(Colors.White).FontSize(11).Margin(3)
-                .HorizontalOptions(LayoutOptions.Start).VerticalOptions(LayoutOptions.Start));
+                .Text(day.ToString())
+                .TextColor(Colors.White) // Her zaman beyaz (Seçiliyken de okunur)
+                .FontSize(12)
+                .FontAttributes(isSelected ? FontAttributes.Bold : FontAttributes.None)
+                .HorizontalOptions(LayoutOptions.Center).VerticalOptions(LayoutOptions.Center));
 
-            grid.Children.Add(new Border()
+            // 👇 GÜNCELLENDİ: Arkaplan rengi Mor oldu (#9747FF)
+            var border = new Border()
             {
-                Stroke = Colors.Gray,
-                StrokeThickness = 0.5,
-                BackgroundColor = (day == 9) ? Color.FromArgb("#3F63FF") : Colors.Transparent, // 9 ARALIK YERİNE BUGÜNÜN HÜCRESİ MAVİ OLMALI.
+                StrokeShape = new RoundRectangle { CornerRadius = 10 },
+                Stroke = Colors.Transparent,
+                BackgroundColor = isSelected ? Color.FromArgb("#9747FF") : (isToday ? Color.FromArgb("#3F63FF") : Colors.Transparent),
                 Content = cellContent
-            }.Row(row).Column(col));
+            };
+
+            var tap = new TapGestureRecognizer();
+            tap.Command = new Command(() =>
+            {
+                _viewModel.SelectedDate = dateOfCell;
+            });
+            border.GestureRecognizers.Add(tap);
+
+            _calendarGrid.Add(border, col, row);
+
+            col++;
+            if (col > 6) { col = 0; row++; }
         }
-        return grid;
     }
-    private View CreateNavTab(string icon, string text, int col, bool isActive = false) // En alt satır için icon ve yazı üretir (ana sayfa - takvim vb)
+
+    private View CreateNavTab(string icon, string text, int col, bool isActive = false)
     {
         return new VerticalStackLayout()
         {
             Spacing = 2,
             Children = {
-
-                new Label()
-                    .Text(icon) // İconlar (ev - takvim vb)
-                    .FontSize(20)
-                    .CenterHorizontal(),
-
-                new Label()
-                    .Text(text) // Sekmenin adı (ana sayfa - takvim vb)
-                    .TextColor(isActive ? Colors.CornflowerBlue : Colors.White) // Aktif yazı mavi olmayan yazı beyaz (iconlar ile aynı renk)
-                    .FontSize(10)
-                    .CenterHorizontal()
+                new Label().Text(icon).FontSize(20).CenterHorizontal(),
+                new Label().Text(text).TextColor(isActive ? Colors.CornflowerBlue : Colors.White).FontSize(10).CenterHorizontal()
             }
-        }.Column(col); // Hangi kolona konulacağını parametre ile belirliyoruz.
+        }.Column(col);
     }
 }
