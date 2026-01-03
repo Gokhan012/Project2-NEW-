@@ -14,6 +14,17 @@ namespace Project2.WiewModels
         private double height;
         [ObservableProperty]
         private int gender;
+        [RelayCommand]
+        public async Task SelectFemale()
+        {
+            Gender = 1;
+        }
+
+        [RelayCommand]
+        public async Task SelectMale()
+        { 
+            Gender = 0;
+        }
 
         [RelayCommand]
         public async Task Profile()
@@ -22,41 +33,43 @@ namespace Project2.WiewModels
 
             if (currentuser == null)
             {
-                if (Application.Current?.MainPage != null)
-                    await Application.Current.MainPage.DisplayAlert("Hata", "Oturum bulunamadı. Lütfen tekrar giriş yapın.", "Tamam");
+                // ... Hata mesajı aynı kalsın ...
                 return;
             }
 
+            // -----------------------------------------------------------
+            // DÜZELTME 1: Eşitleme işlemini EN BAŞA almalısın.
+            // Yoksa validator "Eski veriler hatalı" deyip işlemi iptal eder.
+            // -----------------------------------------------------------
             currentuser.Age = Age;
             currentuser.Height = Height;
-            currentuser.Weight = Weight;
+            currentuser.Weight = Weight; // Entry bağlıysa burası dolu gelir
             currentuser.Gender = Gender;
 
             try
             {
+                // DÜZELTME 2: Validate işlemi atamadan SONRA yapılmalı
                 PersonValidator.Validate(currentuser);
+
                 await App.Database.UpdatePersonAsync(currentuser);
 
-                // C. Başarılı Mesajı ve Yönlendirme
-                if (Microsoft.Maui.Controls.Application.Current?.MainPage != null)
+                if (Application.Current?.MainPage != null)
                 {
-                    
-                    await Microsoft.Maui.Controls.Application.Current.MainPage.DisplayAlert("Başarılı", "Kayıt başarılı! Profil oluşturmaya yönlendiriliyorsunuz.", "Tamam");
+                    await Application.Current.MainPage.DisplayAlert("Başarılı", "Profil oluşturuldu!", "Tamam");
 
+                    // DÜZELTME 3: Sayfa yönlendirmesini BURADA yapmalısın
+                    // (Butonun içinde değil, kayıt başarılı olunca)
+                    await Application.Current.MainPage.Navigation.PushAsync(new MainDashboardPage());
                 }
             }
             catch (ArgumentException ex)
             {
-                // D. VALIDATOR HATASI YAKALAMA 🥅
-                // Örneğin: "Şifre en az 1 büyük harf içermeli" hatası burada yakalanır.
-                if (Microsoft.Maui.Controls.Application.Current?.MainPage != null)
-                    await Microsoft.Maui.Controls.Application.Current.MainPage.DisplayAlert("Uyarı", ex.Message, "Tamam");
+                if (Application.Current?.MainPage != null)
+                    await Application.Current.MainPage.DisplayAlert("Uyarı", ex.Message, "Tamam");
             }
             catch (Exception ex)
             {
-                // E. GENEL HATA (Veritabanı hatası vs.)
-                if (Microsoft.Maui.Controls.Application.Current?.MainPage != null)
-                    await Microsoft.Maui.Controls.Application.Current.MainPage.DisplayAlert("Hata", "Bir sorun oluştu: " + ex.Message, "Tamam");
+                // ... Genel hata ...
             }
         }
     } }

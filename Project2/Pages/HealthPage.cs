@@ -2,6 +2,8 @@
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
+using Project2.Services;
+using Project2.WiewModels;
 
 namespace Project2.Pages;
 
@@ -14,6 +16,7 @@ public class HealthPage : ContentPage
     private double _targetWater = 2500;
     public HealthPage()
     {
+        BindingContext = new HealthPageWiewModel();
         this.BackgroundColor(Color.FromArgb("#23222E"));
 
         Content = new Grid()
@@ -53,7 +56,20 @@ public class HealthPage : ContentPage
                     ColumnSpacing = 15,
                     Children =
                     {
-                        CreateStatusCard("MEVCUT KİLO", "0 kg", "Veri girmek için tıkla!", 0),
+                    CreateStatusCard(
+                            title: "Kilo",
+                            value: "0 kg",
+                            subtitle: "Güncellemek için dokun",
+                            col: 0,
+                            // 1. VERİ BAĞLANTISI (Doğru Yol)
+                            valueBinding: new Binding("CurrentUser.Weight", stringFormat: "{0} kg")
+                            {
+                                TargetNullValue = "0 kg",
+                                FallbackValue = "0 kg"
+                            },
+                            // 2. TIKLAMA KOMUTU (Doğru İsim - String Olarak)
+                            commandPath: "KgChancherCommand"
+                        ),
                         CreateBmiCard().Column(1)
                     }
                 }.Row(1),
@@ -214,29 +230,75 @@ public class HealthPage : ContentPage
 
     // --- YARDIMCI METOTLAR ---
 
-    private View CreateStatusCard(string title, string value, string subtitle, int col)
-    {
-        return new Border()
-        {
-            Stroke = Colors.White,
-            StrokeThickness = 1,
-            Padding = 12,
-            Content = new VerticalStackLayout()
-            {
-                Spacing = 6,
-                Children =
-                {
-                    new Label().Text(title).TextColor(Colors.White).FontSize(11).CenterHorizontal(),
-                    new Label().Text(value).TextColor(Colors.White).FontSize(20).FontAttributes(FontAttributes.Bold).CenterHorizontal(),
-                    new Label().Text("✎").TextColor(Color.FromArgb("#00FF85")).CenterHorizontal(),
-                    new Label().Text(subtitle).TextColor(Colors.Gray).FontSize(10).CenterHorizontal().TextCenter()
-                }
-            }
-        }.Column(col);
-    }
+    private View CreateStatusCard(string title, string value, string subtitle, int col, BindingBase valueBinding = null, string commandPath = null)
 
+    {
+
+        var valuelabel = new Label().Text(value).TextColor(Colors.White).FontSize(20).FontAttributes(FontAttributes.Bold).CenterHorizontal();
+
+        if (valueBinding != null)
+
+        {
+
+            valuelabel.SetBinding(Label.TextProperty, valueBinding);
+
+        }
+
+        var border = new Border()
+
+        {
+
+            Stroke = Colors.White,
+
+            StrokeThickness = 1,
+
+            Padding = 12,
+
+            Content = new VerticalStackLayout()
+
+            {
+
+                Spacing = 6,
+
+                Children =
+
+                {
+
+                    new Label().Text(title).TextColor(Colors.White).FontSize(11).CenterHorizontal(),
+
+                   valuelabel,
+
+                    new Label().Text("✎").TextColor(Color.FromArgb("#00FF85")).CenterHorizontal(),
+
+                    new Label().Text(subtitle).TextColor(Colors.Gray).FontSize(10).CenterHorizontal().TextCenter()
+
+                }
+
+            }
+
+        };
+
+        if (!string.IsNullOrEmpty(commandPath))
+
+        {
+
+            var tapGesture = new TapGestureRecognizer();
+
+            tapGesture.SetBinding(TapGestureRecognizer.CommandProperty, commandPath);
+
+            border.GestureRecognizers.Add(tapGesture);
+
+        }
+
+        return border.Column(col);
+
+    }
     private View CreateBmiCard()
     {
+        double sonuc = VkiHesaplayici.hesapla(
+    UserSeassion.CurrentUser.Weight ?? 0,
+    UserSeassion.CurrentUser.Height ?? 0
+);
         return new Border()
         {
             Stroke = Colors.White,
@@ -248,8 +310,8 @@ public class HealthPage : ContentPage
                 Children =
                 {
                     new Label().Text("BMI SKORU").TextColor(Colors.White).FontSize(11).CenterHorizontal(),
-                    new Label().Text("0").TextColor(Colors.White).FontSize(20).FontAttributes(FontAttributes.Bold).CenterHorizontal(),
-                    new Label().Text("Veri girilmedi").TextColor(Colors.Gray).FontSize(10).CenterHorizontal()
+                    new Label().Text(sonuc.ToString("F2")).TextColor(Colors.White).FontSize(20).FontAttributes(FontAttributes.Bold).CenterHorizontal(),
+                    new Label().Text(Services.VkiHesaplayici.aralikGetir(sonuc)).TextColor(Colors.Gray).FontSize(10).CenterHorizontal()
                 }
             }
         };
@@ -375,5 +437,16 @@ public class HealthPage : ContentPage
         // Metinleri güncelle
         _waterLabel.Text = $"{_currentWater} ml / {_targetWater} ml";
 
+    }
+    // Sayfa her ekrana geldiğinde (Geri tuşuyla dönüldüğünde bile) çalışır
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        // ViewModel'daki LoadUserData metodunu tetikliyoruz
+        if (BindingContext is HealthPageWiewModel vm)
+        {
+            vm.LoadUserData();
+        }
     }
 }

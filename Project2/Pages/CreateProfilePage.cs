@@ -58,10 +58,10 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                         },
 
                         // BOY (Entry)
-                        CreateInputGroup("Boy (cm)"), // Boy için Label,Border,Entry içeren elemanları oluşturur.
+                        CreateInputGroup("Boy (cm)",nameof(CreateProfilePageWiew.Height)), // Boy için Label,Border,Entry içeren elemanları oluşturur.
                         
                         // KİLO (Entry)
-                        CreateInputGroup("Kilo (kg)"), // Kilo için Label,Border,Entry içeren elemanları oluşturur.
+                        CreateInputGroup("Kilo (kg)",nameof(CreateProfilePageWiew.Weight)), // Kilo için Label,Border,Entry içeren elemanları oluşturur.
 
                         // CİNSİYET BAŞLIĞI
                         new Label() // Etiket
@@ -88,7 +88,8 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                                     .BackgroundColor(Colors.Transparent) // Buton arka planı şeffaf.
                                     .BorderColor(Colors.White) // Butonun çerçevesi beyaz.
                                     .BorderWidth(1) // Çerçeve kalınlığı 1 px.
-                                    .Column(0), // Butonu Gridin 0. sutünuna yerleştirir.(sola)
+                                    .Column(0) // Butonu Gridin 0. sutünuna yerleştirir.(sola)
+                                    .Bind(Button.CommandProperty, nameof(CreateProfilePageWiew.SelectFemaleCommand)),
 
                                 new Button() // Buton
                                     .Text("Erkek") // Buton üzerinde Erkek yazısı.
@@ -97,6 +98,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                                     .BorderColor(Colors.White) // Butonun çerçevesi beyaz.
                                     .BorderWidth(1) // Çerçeve kalınlığı 1 px.
                                     .Column(1) // Butonu Gridin 1. sutünuna yerleştirir.(sağa)
+                                    .Bind(Button.CommandProperty, nameof(CreateProfilePageWiew.SelectMaleCommand)),
                             }
                         },
 
@@ -120,10 +122,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                                     .BorderColor(Colors.White) // Beyaz kenarlık
                                     .BorderWidth(1) // İnce kenarlık
                                     .Column(0) // Butonu Gridin 0. sutünuna yerleştirir.(sola)
-                                    .GestureRecognizers(new TapGestureRecognizer() // Label’ı buton gibi tıklanabilir yapar.
-                                    {
-                                    Command = new Command(async () => await Navigation.PushAsync(new MainDashboardPage()))
-                                    }),
+                                    .Bind(Button.CommandProperty, nameof(CreateProfilePageWiew.ProfileCommand)),
 
 
                                 new Button() // Buton
@@ -134,10 +133,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                                     .BorderColor(Colors.White) // Beyaz kenarlık
                                     .BorderWidth(1) // İnce kenarlık
                                     .Column(1) // Butonu Gridin 1. sutünuna yerleştirir.(sağa)
-                                    .GestureRecognizers(new TapGestureRecognizer() // Label’ı buton gibi tıklanabilir yapar.
-                                    {
-                                    Command = new Command(async () => await Navigation.PushAsync(new MainDashboardPage()))
-                                    }),
+                                    .Bind(Button.CommandProperty, nameof(CreateProfilePageWiew.ProfileCommand))
 
                             }
                         }
@@ -148,7 +144,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
     }
 
     // Ortak Input Grubu Metodu
-    private View CreateInputGroup(string title) // Kod tekrarını azaltan metot.
+    private View CreateInputGroup(string title , string bindingPath) // Kod tekrarını azaltan metot.
     {
         return new VerticalStackLayout() // Dikey Yerleşim. İçindeki elemanları üstten alta dizer.
         {
@@ -170,6 +166,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                             .BackgroundColor(Colors.Transparent) // Entry arka planı şeffaf.
                             .HeightRequest(45) // Entry yüksekliği 40 px.
                             .Keyboard(Keyboard.Numeric) // Boy/Kilo için sayısal klavye açar.
+                            .Bind(Entry.TextProperty, bindingPath) // Metoda girilen ikinci parametre ile ViewModeldeki ilgili özelliğe bağlar
                     )
             }
         };

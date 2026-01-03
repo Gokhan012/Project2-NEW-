@@ -9,5 +9,6 @@ namespace Project2.Services
     public static class UserSeassion
     {
         public static Project2.Models.Person? CurrentUser { get; set; }
+
     }
 }

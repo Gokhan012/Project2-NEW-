@@ -152,7 +152,7 @@ public class MainDashboardPage : ContentPage
                                 CreateNavTab("🏠", "Ana Sayfa", 0,nameof(MainDashboardPageWiewModel.GotoMainPageCommand),true), // Bir alt navigasyon sekmesi oluşturur
                                 CreateNavTab("📅", "Takvim", 1,nameof(MainDashboardPageWiewModel.GotoCalendarPageCommand),false),          // İkon - Sekme ismi - Sütun yeri - Sekme aktif mi?
                                 CreateNavTab("💰", "Bütçe", 2,nameof(MainDashboardPageWiewModel.GotoBillPageCommand), false),
-                                CreateNavTab("❤️", "Sağlık", 3,nameof(MainDashboardPageWiewModel.GotoMedicinePageCommand), false)
+                                CreateNavTab("❤️", "Sağlık", 3,nameof(MainDashboardPageWiewModel.GotoHealthPageCommand), false)
                             }
                         }
                     ).Row(3) // 4.satıra yerleştir
