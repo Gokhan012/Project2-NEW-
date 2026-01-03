@@ -3,7 +3,7 @@ using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 
-namespace MyAppMAUI.Pages;
+namespace Project2.Pages;
 
 public class HealthPage : ContentPage
 {

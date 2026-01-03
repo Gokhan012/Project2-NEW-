@@ -1,7 +1,7 @@
 ﻿using FmgLib.MauiMarkup;
 using Microsoft.Maui.Controls.Shapes;
 
-namespace MyAppMAUI.Pages;
+namespace Project2.Pages;
 
 public class BudgetPage : ContentPage
 {

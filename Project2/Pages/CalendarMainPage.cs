@@ -3,7 +3,7 @@ using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Layouts;
-using MyAppMAUI.Pages;
+using Project2.Pages;
 using Project2.WiewModels;
 using static Microsoft.Maui.GridLength;
 
