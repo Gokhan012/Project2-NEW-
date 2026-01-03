@@ -9,11 +9,10 @@ namespace Project2.Pages;
 
 public class HealthPage : ContentPage
 {
-    private Label _waterLabel;
+    
     private Ellipse _progressCircle;
     private Label _targetGoalLabel;
-    private double _currentWater = 0;
-    private double _targetWater = 2500;
+
     public HealthPage()
     {
         BindingContext = new HealthPageWiewModel();
@@ -107,7 +106,16 @@ public class HealthPage : ContentPage
                             .StrokeDashArray(new double[] { 0, 100 }) // Başlangıçta boş
                             .StrokeDashOffset(0)
                             .CenterHorizontal()
-                            .CenterVertical()),
+                            .CenterVertical())
+                            .Bind(Ellipse.StrokeDashArrayProperty, "SuTakibiVM.CurrentWater",
+                            convert: (double current) =>
+                            {
+                                double goal = 3000.0;
+                                double progress = (current / goal) * 10;
+                                if (progress > 10) progress = 10;
+                                if (progress < 0) progress = 0;
+                                return new DoubleCollection { progress, 100 };
+                            }), 
 
                             // KATMAN 3: İçteki Beyaz Daire ve Yazılar
                             new Border()
@@ -119,12 +127,10 @@ public class HealthPage : ContentPage
                                 HorizontalOptions = LayoutOptions.Center,
                                 VerticalOptions = LayoutOptions.Center,
                                 GestureRecognizers =
-                                {
-                                    new TapGestureRecognizer
                                     {
-                                        Command = new Command(async () => await ChangeWaterGoal())
-                                    }
-                                },
+                                        new TapGestureRecognizer()
+                                        .Bind(TapGestureRecognizer.CommandProperty, "SuTakibiVM.ChangeWaterGoalCommand")
+                                     },
 
                                 Content = new VerticalStackLayout()
                                 {
@@ -133,11 +139,12 @@ public class HealthPage : ContentPage
                                     Children =
                                     {
                                         // Mevcut miktar etiketi
-                                        (_waterLabel = new Label()
-                                        .Text($"{_currentWater} ml / {_targetWater} ml")
+                                         new Label()
+                                        //Burada text vardı Bind olduğu için sildim
                                         .TextColor(Colors.Black)
                                         .FontAttributes(FontAttributes.Bold)
-                                        .CenterHorizontal()),
+                                        .CenterHorizontal()
+                                        .Bind(Label.TextProperty, "SuTakibiVM.WaterLabelText"),
 
 
                                         (_targetGoalLabel = new Label()
@@ -164,66 +171,67 @@ public class HealthPage : ContentPage
                             ColumnSpacing = 10,
                             Children =
                             {
-                                CreateWaterButton("+250 ml", 0),
-                                CreateWaterButton("+500 ml", 1),
-                                CreateWaterButton("+ Özel", 2)
+                                CreateWaterButton("+250 ml", 0, "250"),
+                                CreateWaterButton("+500 ml", 1, "500"),
+                                CreateWaterButton("+ Özel", 2, "Custom")
                             }
                         }
                     }
                 }.Row(2),
 
-                new VerticalStackLayout()
-                {
-                    Spacing = 10,
-                    Margin = new Thickness(0, 25, 0, 0),
-                    Children =
+                    // ... önceki satırlar (Row 0, 1, 2) aynı ...
+
+                    new VerticalStackLayout()
                     {
-                        new Grid()
+                        Spacing = 10,
+                        Margin = new Thickness(0, 25, 0, 0),
+                        Children =
                         {
-                            ColumnDefinitions =
+                            // BAŞLIK GRUBU
+                            new Grid()
                             {
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Auto)
-                            },
-                            Children =
-                            {
-                                new Label()
-                                    .Text("İlaç Takibi")
-                                    .TextColor(Colors.White)
-                                    .FontSize(18)
-                                    .FontAttributes(FontAttributes.Bold),
-
-                                new Label()
-                                    .Text("+")
-                                    .TextColor(Color.FromArgb("#00FF85"))
-                                    .FontSize(30)
-                                    .FontAttributes(FontAttributes.Bold)
-                                    .Column(1)
-                                    .GestureRecognizers(new TapGestureRecognizer()
-                                    {
-                                    Command = new Command(async () => await Navigation.PushAsync(new AddMedicinePage()))
-                                    }),
-                            }
-                        },
-
-                        new ScrollView()
-                        {
-                            Content = new VerticalStackLayout()
-                            {
-                                Spacing = 10,
+                                ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) },
                                 Children =
                                 {
+                                    new Label().Text("İlaç Takibi").TextColor(Colors.White).FontSize(18).FontAttributes(FontAttributes.Bold),
+                                    new Label().Text("+").TextColor(Color.FromArgb("#00FF85")).FontSize(30).FontAttributes(FontAttributes.Bold).Column(1)
+                                        .GestureRecognizers(new TapGestureRecognizer() {
+                                            Command = new Command(async () => await Navigation.PushAsync(new AddMedicinePage()))
+                                        }),
+                                }
+                            },
+
+                            // LİSTE GRUBU (Burası artık başlığın hemen altında)
+                           new Grid()
+{
+                                Children =
+                                {
+                                    // Liste boşken görünecek Label
                                     new Label()
                                         .Text("Henüz ilaç eklenmedi.\nİlaç eklemek için + butonuna dokunun.")
                                         .TextColor(Colors.Gray)
-                                        .FontSize(13)
+                                        .FontSize(13).CenterHorizontal().CenterVertical().TextCenter()
+                                        .Bind(Label.IsVisibleProperty, "MedicineList.Count", convert: (int count) => count == 0),
+
+                                    // İlaç Listesi
+                                  new ScrollView()
+                                    {
+                                        Content = new VerticalStackLayout()
+                                        {
+                                            Spacing = 10,
+                                        }
+                                        .Bind(BindableLayout.ItemsSourceProperty, "MedicineList")
+                                        // BindableLayout olduğunu açıkça belirten metot:
+                                        .BindableLayoutItemTemplate(new DataTemplate(() => CreateMedicineCard()))
+                                    }
+                                        .Bind(ScrollView.IsVisibleProperty, "MedicineList.Count", convert: (int count) => count > 0)
+                                    
                                 }
                             }
                         }
-                    }
-                }.Row(3),
+                    }.Row(3), // SADECE BU ANA GRUP ROW 3'TE DURMALI
 
-                CreateBottomNav().Row(4)
+                    CreateBottomNav().Row(4)
             }
         };
     }
@@ -317,9 +325,9 @@ public class HealthPage : ContentPage
         };
     }
 
-    private Button CreateWaterButton(string text, int col)
+    private Button CreateWaterButton(string text, int col, string parameter)
     {
-        var button = new Button()
+        return new Button()
             .Text(text)
             .BackgroundColor(Color.FromArgb("#00FF85"))
             .FontAttributes(FontAttributes.Bold)
@@ -329,16 +337,11 @@ public class HealthPage : ContentPage
             .CornerRadius(8)
             .BorderColor(Colors.White)
             .BorderWidth(1)
-            .Column(col);
-
-        button.Clicked += async (s, e) =>
-        {
-            if (text == "+ Özel")
-            {
-                await OpenSpecialWaterPopup();
-            }
-        };
-        return button;
+            .Column(col)
+            // 1. Komutu Bağla: SuTakibiVM içindeki AddWaterCommand
+            .Bind(Button.CommandProperty, "SuTakibiVM.AddWaterCommand")
+            // 2. Parametreyi Gönder: "250" veya "Custom"
+            .CommandParameter(parameter);
     }
 
     private View CreateBottomNav()
@@ -396,57 +399,71 @@ public class HealthPage : ContentPage
         }.Column(col);
     }
 
-    private async Task OpenSpecialWaterPopup()
+    private View CreateMedicineCard()
     {
-        string result = await DisplayPromptAsync(
-            title: "Özel Su Girişi",
-            message: "İçtiğiniz miktarı mililitre (ml) cinsinden yazınız:",
-            accept: "Ekle",
-            cancel: "İptal",
-            placeholder: "Örn: 330",
-            maxLength: 4,
-            keyboard: Keyboard.Numeric);
+        var checkLabel = new Label { Text = "✔", TextColor = Colors.Gray, HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center };
 
-        if (!string.IsNullOrWhiteSpace(result))
+        // İçildi tetikleyicisi
+        checkLabel.Triggers.Add(new DataTrigger(typeof(Label))
         {
-            await DisplayAlert("Başarılı", "Girilen su miktarı eklendi!", "Tamam");
-        }
-    }
+            Binding = new Binding("LastTakenDate.Date"),
+            Value = DateTime.Today,
+            Setters = { new Setter { Property = Label.TextColorProperty, Value = Color.FromArgb("#00FF85") } }
+        });
 
-    private async Task ChangeWaterGoal()
-    {
-        string result = await DisplayPromptAsync(
-            title: "Hedef Güncelle",
-            message: "Günlük su içme hedefinizi belirleyin (ml):",
-            accept: "Güncelle",
-            cancel: "İptal",
-            placeholder: "Örn: 3000",
-            initialValue: _targetWater.ToString(),
-            keyboard: Keyboard.Numeric);
+        var checkBorder = new Border { HeightRequest = 35, WidthRequest = 35, Stroke = Colors.Gray, Content = checkLabel };
 
-        if (double.TryParse(result, out double newGoal) && newGoal > 0)
+        checkBorder.Triggers.Add(new DataTrigger(typeof(Border))
         {
-            _targetWater = newGoal;
-            UpdateWaterUI(0); // UI'ı yeni hedefe göre tazele
-        }
-    }
-    private void UpdateWaterUI(double addedAmount)
-    {
-        _currentWater += addedAmount;
+            Binding = new Binding("LastTakenDate.Date"),
+            Value = DateTime.Today,
+            Setters = { new Setter { Property = Border.StrokeProperty, Value = Color.FromArgb("#00FF85") } }
+        });
 
-        // Metinleri güncelle
-        _waterLabel.Text = $"{_currentWater} ml / {_targetWater} ml";
+        return new Border
+        {
+            Stroke = Color.FromArgb("#33FFFFFF"),
+            BackgroundColor = Color.FromArgb("#1AFFFFFF"),
+            Padding = 15,
+            StrokeShape = new RoundRectangle { CornerRadius = 12 },
+            Content = new Grid
+            {
+                ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto), new ColumnDefinition(GridLength.Auto), new ColumnDefinition(GridLength.Auto) },
+                Children = {
+                    new VerticalStackLayout {
+                        Children = {
+                            new Label().TextColor(Colors.White).FontAttributes(FontAttributes.Bold).Bind(Label.TextProperty, "MedicineName"),
+                            new Label().TextColor(Colors.Gray).FontSize(12).Bind(Label.TextProperty, "MedicineDose", stringFormat: "{0} mg")
+                        }
+                    }.Column(0).CenterVertical(),
+                    new Label().TextColor(Colors.LightGray).Margin(10,0).Bind(Label.TextProperty, "MedicineTime", stringFormat: "{0:HH:mm}").Column(1).CenterVertical(),
 
+                    checkBorder.Column(2).CenterVertical().GestureRecognizers(new TapGestureRecognizer()
+                        .Bind(TapGestureRecognizer.CommandProperty, "ToggleMedicineCommand", source: this)//BindingContext vardı sildim
+                        .Bind(TapGestureRecognizer.CommandParameterProperty, ".")),
+
+                    new Label { Text = "🗑", TextColor = Colors.Red, FontSize = 20 }.Column(3).CenterVertical().Margin(10,0,0,0)//BindingContext vardı sildim
+                        .GestureRecognizers(new TapGestureRecognizer()
+                        .Bind(TapGestureRecognizer.CommandProperty, "DeleteMedicineCommand", source: this)
+                        .Bind(TapGestureRecognizer.CommandParameterProperty, "."))
+                }
+            }
+        };
     }
+
     // Sayfa her ekrana geldiğinde (Geri tuşuyla dönüldüğünde bile) çalışır
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-        // ViewModel'daki LoadUserData metodunu tetikliyoruz
         if (BindingContext is HealthPageWiewModel vm)
         {
+            // 1. Kullanıcı oturum verilerini (Kilo vb.) yükle
             vm.LoadUserData();
+
+            // 2. İlaç listesini veritabanından async olarak çek
+            // await kullanarak verilerin tam yüklendiğinden emin oluyoruz
+            await vm.LoadMedicines();
         }
     }
 }

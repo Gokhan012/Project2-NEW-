@@ -10,5 +10,8 @@ namespace Project2.Services
     {
         public static Project2.Models.Person? CurrentUser { get; set; }
 
+        public static Project2.Models.tblWater? CurrentlWater { get; set; }
+
+        public static Project2.Models.tblMedicine? CurrentMedicine { get; set; }
     }
 }

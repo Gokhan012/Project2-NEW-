@@ -1,13 +1,14 @@
 ﻿using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using FmgLib.MauiMarkup;
-
+using Project2.WiewModels;
 namespace Project2.Pages;
 
 public class AddMedicinePage : ContentPage
 {
     public AddMedicinePage()
     {
+        BindingContext = new AddMedicinePageWiewmodel();
         this.BackgroundColor(Color.FromArgb("#23222E"));
 
         Content = new Grid()
@@ -35,8 +36,8 @@ public class AddMedicinePage : ContentPage
                             .Margin(new Thickness(0, 0, 0, 10)),
 
                         // GİRİŞ ALANLARI
-                        CreateInputGroup("İlaç Adı"),
-                        CreateInputGroup("Dozaj"),
+                        CreateInputGroup("İlaç Adı", "IlacAdi"),
+                        CreateInputGroup("Dozaj (mg)", "Doz"),
 
                         // SAAT SEÇİMİ
                         new VerticalStackLayout()
@@ -86,6 +87,7 @@ public class AddMedicinePage : ContentPage
                             .BorderWidth(1)
                             .CenterHorizontal()
                             .Margin(new Thickness(0, 40, 0, 0))
+                            .Bind(Button.CommandProperty, "KaydetCommand")
                     }
                 }.Row(0),
             }
@@ -93,28 +95,30 @@ public class AddMedicinePage : ContentPage
     }
 
     // Ortak Giriş Grubu Oluşturucu (Etiket + Border + Entry)
-    private View CreateInputGroup(string title)
+    private View CreateInputGroup(string title, string bindingpath)
     {
         return new VerticalStackLayout()
         {
             Spacing = 8,
-            Children = {
-                new Label()
-                    .Text(title)
+            Children =
+        {
+            new Label()
+                .Text(title)
+                .TextColor(Colors.White)
+                .FontSize(14),
+            new Border()
+            {
+                Stroke = Colors.White,
+                StrokeThickness = 1,
+                BackgroundColor = Colors.Transparent,
+                Padding = new Thickness(10, 0),
+                Content = new Entry()
                     .TextColor(Colors.White)
-                    .FontSize(14),
-                new Border()
-                    .Stroke(Colors.White)
-                    .StrokeThickness(1)
                     .BackgroundColor(Colors.Transparent)
-                    .Padding(new Thickness(10, 0))
-                    .Content(
-                        new Entry()
-                            .TextColor(Colors.White)
-                            .BackgroundColor(Colors.Transparent)
-                            .HeightRequest(45)
-                    )
+                    .HeightRequest(45)
+                    .Bind(Entry.TextProperty, bindingpath, mode: BindingMode.TwoWay)
             }
+        }
         };
     }
 }

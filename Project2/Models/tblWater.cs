@@ -15,11 +15,13 @@ public class tblWater
 
     // SQL: WaterDrinkTime TEXT
     // SQLite ORM'i DateTime'ı otomatik olarak veritabanında saklayabilir.
-    public DateTime WaterDrinkTime { get; set; }
+    //public DateTime WaterDrinkTime { get; set; }
 
     // SQL: WaterDrink REAL
     public double WaterDrink { get; set; }
 
     // SQL: WaterNeeded REAL
     public double WaterNeeded { get; set; }
+
+    public DateTime Date { get; set; }
 }

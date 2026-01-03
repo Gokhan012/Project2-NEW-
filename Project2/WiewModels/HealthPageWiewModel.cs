@@ -1,8 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Project2.Models;
-using Project2.Services;
 using Project2.Pages;
+using Project2.Services;
+using System.Collections.ObjectModel;
 
 namespace Project2.WiewModels
 {
@@ -12,6 +13,12 @@ namespace Project2.WiewModels
         [ObservableProperty]
         private Person? _currentUser;
 
+        [ObservableProperty]
+        private SuTakibiViewModel _suTakibiVM;
+
+        [ObservableProperty]
+        private ObservableCollection<tblMedicine> _medicineList = new ObservableCollection<tblMedicine>();
+
         // Sayfa açılınca veya geri dönülünce bu metodu çağıracağız
         public void LoadUserData()
         {
@@ -19,6 +26,12 @@ namespace Project2.WiewModels
             {
                 CurrentUser = UserSeassion.CurrentUser;
             }
+        }
+
+        public HealthPageWiewModel()
+        {
+            // Alt ViewModel'i başlatıyoruz ki null hatası almayalım
+            SuTakibiVM = new SuTakibiViewModel();
         }
 
         // --- KİLO DEĞİŞTİRME KOMUTU ---
@@ -59,6 +72,68 @@ namespace Project2.WiewModels
                 // Sayı girilmediyse hata ver
                 await Application.Current.MainPage.DisplayAlert("Hata", "Lütfen geçerli bir sayı giriniz.", "Tamam");
             }
+        }
+
+        // 2. İlaçları Veritabanından Çekme Metodu
+        public async Task LoadMedicines()
+        {
+            if (CurrentUser == null) return;
+
+            // Veritabanından kullanıcının ilaçlarını al
+            // (DatabaseService içinde GetMedicinesAsync(PersonID) metodu olduğunu varsayıyoruz)
+            var list = await App.Database.GetMedicinesAsync(UserSeassion.CurrentUser.ID);
+
+            // Listeyi temizle ve yeniden doldur
+            MedicineList.Clear();
+            foreach (var item in list)
+            {
+                MedicineList.Add(item);
+            }
+        }
+
+        // 3. İlaç Silme Komutu
+        [RelayCommand]
+        public async Task DeleteMedicine(tblMedicine med)
+        {
+            if (med == null) return;
+
+            bool answer = await Application.Current.MainPage.DisplayAlert("Sil", $"{med.MedicineName} silinsin mi?", "Evet", "Hayır");
+            if (answer)
+            {
+                await App.Database.DeleteMedicineAsync(med);
+                MedicineList.Remove(med); // Ekrandan da anında sil
+            }
+        }
+
+        // 4. İlaç İçildi İşaretleme (Toggle)
+        [RelayCommand]
+        public async Task ToggleMedicine(tblMedicine med)
+        {
+            if (med == null) return;
+
+            // Eğer bugün zaten içildiyse, tarihi sıfırla (İptal et)
+            if (med.LastTakenDate.Date == DateTime.Today)
+            {
+                med.LastTakenDate = DateTime.MinValue; // Veya eski bir tarih
+            }
+            else
+            {
+                // İçilmediyse bugünün tarihini at
+                med.LastTakenDate = DateTime.Now;
+
+                // Kullanıcıya küçük bir geri bildirim ver (Toast mesajı gibi)
+                // (Burada basit alert kullanıyoruz ama istenirse kaldırılabilir)
+                // await Application.Current.MainPage.DisplayAlert("Bilgi", $"{med.MedicineName} alındı.", "Tamam");
+            }
+
+            // Veritabanını güncelle
+            await App.Database.SaveMedicineAsync(med);
+
+            // Listeyi yenile ki yeşil tik görünsün/gitsin
+            // (MVVM'de nesne içindeki özellik değişince UI bazen tetiklenmez, 
+            // en garantisi listedeki o elemanı güncellemektir ama şimdilik Load çağırabiliriz veya 
+            // ObservableObject ise otomatik olur. En basiti listeyi tazelemek.)
+            await LoadMedicines();
         }
     }
 }
