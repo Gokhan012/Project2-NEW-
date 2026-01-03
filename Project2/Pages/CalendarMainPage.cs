@@ -3,6 +3,7 @@ using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Layouts;
+using MyAppMAUI.Pages;
 using Project2.WiewModels;
 using static Microsoft.Maui.GridLength;
 
@@ -152,8 +153,8 @@ public class CalendarMainPage : ContentPage
                             Children = {
                                 CreateNavTab("🏠", "Ana Sayfa", 0).GestureRecognizers(new TapGestureRecognizer() { Command = new Command(async () => await Navigation.PushAsync(new MainDashboardPage())) }),
                                 CreateNavTab("📅", "Takvim", 1, true),
-                                CreateNavTab("💰", "Bütçe", 2),
-                                CreateNavTab("❤️", "Sağlık", 3)
+                                CreateNavTab("💰", "Bütçe", 2).GestureRecognizers(new TapGestureRecognizer() { Command = new Command(async () => await Navigation.PushAsync(new BudgetPage())) }),
+                                CreateNavTab("❤️", "Sağlık", 3).GestureRecognizers(new TapGestureRecognizer() { Command = new Command(async () => await Navigation.PushAsync(new HealthPage())) }),
                             }
                         }
                     ).Row(3)

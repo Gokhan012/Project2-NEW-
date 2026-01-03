@@ -16,7 +16,6 @@ public class AddMedicinePage : ContentPage
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Star), // 0: Form içeriği (Kalan alanı kaplar)
-                new RowDefinition(GridLength.Auto)  // 1: Alt Navigasyon (İçeriği kadar)
             },
             Children =
             {
@@ -89,40 +88,6 @@ public class AddMedicinePage : ContentPage
                             .Margin(new Thickness(0, 40, 0, 0))
                     }
                 }.Row(0),
-
-                // ALT NAVİGASYON BARI
-                new Border()
-                    .Stroke(Colors.White)
-                    .StrokeThickness(1)
-                    .Margin(new Thickness(-20, 0))
-                    .Padding(new Thickness(0, 10))
-                    .Content(
-                        new Grid()
-                        {
-                            ColumnDefinitions = {
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star)
-                            },
-                            Children =
-                            {
-                                CreateNavTab("🏠", "Ana Sayfa", 0)
-                                .GestureRecognizers(new TapGestureRecognizer()
-                                {
-                                    Command = new Command(async () => await Navigation.PushAsync(new MainDashboardPage()))
-                                }),
-                                CreateNavTab("📅", "Takvim", 1)
-                                .GestureRecognizers(new TapGestureRecognizer() // Takvim ikonuna basınca takvim ekranı açılır.
-                                {
-                                    Command = new Command(async () => await Navigation.PushAsync(new CalendarMainPage()))
-                                }),
-                                CreateNavTab("💰", "Bütçe", 2),
-                                CreateNavTab("❤️", "Sağlık", 3, true) // Sağlık sekmesi aktif
-                                
-                            }
-                        }
-                    ).Row(1)
             }
         };
     }
@@ -151,27 +116,5 @@ public class AddMedicinePage : ContentPage
                     )
             }
         };
-    }
-
-    // Alt navigasyon sekmelerini oluşturan yardımcı metot
-    private View CreateNavTab(string icon, string text, int col, bool isActive = false) // En alt satır için icon ve yazı üretir (ana sayfa - takvim vb)
-    {
-        return new VerticalStackLayout()
-        {
-            Spacing = 2,
-            Children = {
-
-                new Label()
-                    .Text(icon) // İconlar (ev - takvim vb)
-                    .FontSize(20)
-                    .CenterHorizontal(),
-
-                new Label()
-                    .Text(text) // Sekmenin adı (ana sayfa - takvim vb)
-                    .TextColor(isActive ? Colors.CornflowerBlue : Colors.White) // Aktif yazı mavi olmayan yazı beyaz (iconlar ile aynı renk)
-                    .FontSize(10)
-                    .CenterHorizontal()
-            }
-        }.Column(col); // Hangi kolona konulacağını parametre ile belirliyoruz.
     }
 }

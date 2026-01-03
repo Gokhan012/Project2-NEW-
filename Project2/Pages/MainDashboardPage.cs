@@ -126,7 +126,6 @@ public class MainDashboardPage : ContentPage
                             {
                                 CreateActionButton("💰", "harcama ekle",nameof(MainDashboardPageWiewModel.GotoBillPageCommand)),
                                 CreateActionButton("💧", "Su ekle",nameof(MainDashboardPageWiewModel.GotoMedicinePageCommand)),
-                                CreateActionButton("💊", "İlaç ekle",nameof(MainDashboardPageWiewModel.GotoMedicinePageCommand))
                             } 
                         }.Assign(out _actionButtonsPopup) // Menü (HorizontalStackLayout) artık _actionButtonsPopup değişkenine bağlandı
                     }
