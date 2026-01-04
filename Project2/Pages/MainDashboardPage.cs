@@ -60,6 +60,10 @@ public class MainDashboardPage : ContentPage
                                 new Label()
                                     .Text("⚙️") // Ayarlar iconu
                                     .FontSize(22)
+                                    .GestureRecognizers(new TapGestureRecognizer() // Label’ı buton gibi tıklanabilir yapar.
+                                    {
+                                        Command = new Command(async () => await Navigation.PushAsync(new ProfileEditPage()))
+                                    }),
                             }
                         }.Column(1) // Bildirim ve ayarlar iconu sağ kolona yerleşti.
                     }
