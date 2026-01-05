@@ -1,75 +1,106 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Project2.Models;
 using Project2.Services;
+using System;
+using System.Threading.Tasks;
 
 namespace Project2.WiewModels
 {
-    partial class CreateProfilePageWiew : ObservableObject
+    // Toolkit otomatik olarak 'Command' takılarını ekleyecektir.
+    public partial class CreateProfilePageView : ObservableObject
     {
+        // --- Form Alanları ---
+
         [ObservableProperty]
-        private int age;
+        private DateTime _birthDate = DateTime.Now.AddYears(-20); // Varsayılan 20 yıl önce
+
         [ObservableProperty]
-        private double weight;
+        private double _weight;
+
         [ObservableProperty]
-        private double height;
+        private double _height;
+
         [ObservableProperty]
-        private int gender;
+        private string _selectedGender = ""; // "K" veya "E"
+
+        // --- Dinamik Renk Mülkleri ---
+
+        public Color FemaleBtnColor => SelectedGender == "K" ? Colors.DeepPink : Colors.Transparent;
+        public Color MaleBtnColor => SelectedGender == "E" ? Colors.DodgerBlue : Colors.Transparent;
+
+        // --- Cinsiyet Seçim Komutları ---
+
         [RelayCommand]
-        public async Task SelectFemale()
+        public void SelectFemale()
         {
-            Gender = 1;
+            SelectedGender = "K";
+            OnPropertyChanged(nameof(FemaleBtnColor));
+            OnPropertyChanged(nameof(MaleBtnColor));
         }
 
         [RelayCommand]
-        public async Task SelectMale()
-        { 
-            Gender = 0;
+        public void SelectMale()
+        {
+            SelectedGender = "E";
+            OnPropertyChanged(nameof(FemaleBtnColor));
+            OnPropertyChanged(nameof(MaleBtnColor));
         }
+
+        // --- Kaydetme (Profil Oluştur) Komutu ---
 
         [RelayCommand]
         public async Task Profile()
         {
             var currentuser = UserSeassion.CurrentUser;
-
-            if (currentuser == null)
-            {
-                // ... Hata mesajı aynı kalsın ...
-                return;
-            }
-
-            // -----------------------------------------------------------
-            // DÜZELTME 1: Eşitleme işlemini EN BAŞA almalısın.
-            // Yoksa validator "Eski veriler hatalı" deyip işlemi iptal eder.
-            // -----------------------------------------------------------
-            currentuser.Age = Age;
-            currentuser.Height = Height;
-            currentuser.Weight = Weight; // Entry bağlıysa burası dolu gelir
-            currentuser.Gender = Gender;
+            if (currentuser == null) return;
 
             try
             {
-                // DÜZELTME 2: Validate işlemi atamadan SONRA yapılmalı
+                // 1. Yaş Hesaplama (DateTime -> int)
+                int age = DateTime.Now.Year - BirthDate.Year;
+                if (BirthDate > DateTime.Now.AddYears(-age)) age--;
+
+                // 2. Verileri Modele Aktar
+                currentuser.Age = age;
+                currentuser.Height = Height;
+                currentuser.Weight = Weight;
+
+                // Cinsiyet Karşılığı (Örn: Erkek 1, Kadın 2)
+                currentuser.Gender = SelectedGender == "E" ? 1 : (SelectedGender == "K" ? 2 : 0);
+
+                // 3. Doğrulama (Validator)
                 PersonValidator.Validate(currentuser);
 
+                // 4. Veritabanı Güncelleme
                 await App.Database.UpdatePersonAsync(currentuser);
 
-                if (Application.Current?.MainPage != null)
-                {
-                    await Application.Current.MainPage.DisplayAlert("Başarılı", "Profil oluşturuldu!", "Tamam");
-
-                    // DÜZELTME 3: Sayfa yönlendirmesini BURADA yapmalısın
-                    // (Butonun içinde değil, kayıt başarılı olunca)
-                    await Application.Current.MainPage.Navigation.PushAsync(new MainDashboardPage());
-                }
+                // 5. Başarılı Mesajı ve Navigasyon
+                await Application.Current.MainPage.DisplayAlert("Başarılı", $"Profiliniz oluşturuldu! (Yaş: {age})", "Tamam");
+                await Application.Current.MainPage.Navigation.PushAsync(new MainDashboardPage());
             }
             catch (ArgumentException ex)
             {
-                if (Application.Current?.MainPage != null)
-                    await Application.Current.MainPage.DisplayAlert("Uyarı", ex.Message, "Tamam");
+                await Application.Current.MainPage.DisplayAlert("Uyarı", ex.Message, "Tamam");
             }
             catch (Exception ex)
             {
-                // ... Genel hata ...
+                await Application.Current.MainPage.DisplayAlert("Hata", "Beklenmedik bir sorun oluştu.", "Tamam");
             }
         }
-    } }
+
+        // --- Atla Komutu ---
+
+        [RelayCommand]
+        public async Task SelectSkip()
+        {
+            bool answer = await Application.Current.MainPage.DisplayAlert("Emin misiniz?", "Profil bilgileriniz su hedefi hesaplamak için kullanılır. Atlamak istiyor musunuz?", "Evet", "Hayır");
+
+            if (answer)
+            {
+                await Application.Current.MainPage.Navigation.PushAsync(new MainDashboardPage());
+            }
+        }
+    }
+}

@@ -101,18 +101,25 @@ public class AppDatabase
         return _db.UpdateAsync(water);
     }
 
-    public async Task<tblWater?> GetWaterRecordByDateAsync(DateTime date)
+    // Belirli bir kullanıcıya ve tarihe göre kayıt getir
+    public async Task<tblWater?> GetWaterRecordByDateAsync(DateTime date, int personId)
     {
         await InitAsync();
+        var start = date.Date;
+        var end = start.AddDays(1);
 
-        // Sorgulanacak günün başlangıcını al (Örn: 05.01.2024 00:00:00)
-        var startOfDay = date.Date;
-        // Sorgulanacak günün sonunu al (Örn: 05.01.2024 23:59:59)
-        var endOfDay = startOfDay.AddDays(1);
-
-        // Veritabanında bu zaman aralığında olan ilk kaydı getir
         return await _db.Table<tblWater>()
-                         .Where(x => x.Date >= startOfDay && x.Date < endOfDay)
+                         .Where(x => x.PersonId == personId && x.Date >= start && x.Date < end)
+                         .FirstOrDefaultAsync();
+    }
+
+    // Belirli bir kullanıcının en son kaydını getir (Hedefi devretmek için)
+    public async Task<tblWater?> GetLatestWaterRecordAsync(int personId)
+    {
+        await InitAsync();
+        return await _db.Table<tblWater>()
+                         .Where(x => x.PersonId == personId)
+                         .OrderByDescending(x => x.Date)
                          .FirstOrDefaultAsync();
     }
 

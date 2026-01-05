@@ -51,7 +51,7 @@ partial class MainDashboardPageWiewModel : ObservableObject
     {
         if (Application.Current.MainPage is not null)
         {
-            await Application.Current.MainPage.Navigation.PushAsync(new Project2.Pages.CalendarMainPage());
+            await Application.Current.MainPage.Navigation.PushAsync(new Project2.Pages.FULLCalendarPage());
         }
     }
 

@@ -92,31 +92,19 @@ public class HealthPage : ContentPage
                             Children =
                             {
                             // KATMAN 1: Arka plandaki soluk mavi halka (Yol)
-                                new Ellipse()
-                                    .Stroke(Color.FromArgb("#332196F3")) // Şeffaf mavi
-                                    .StrokeThickness(10)
-                                    .StrokeDashOffset(0)
-                                    .CenterHorizontal()
-                                    .CenterVertical(),
+                            // KATMAN 1: Arka plandaki sabit duran soluk halka (Yol)
+                            new Ellipse()
+                            .Stroke(Color.FromArgb("#1A2196F3"))
+                            .StrokeThickness(10),
 
-                            // KATMAN 2: Asıl Progres Bar (Mavi)
-                            (_progressCircle = new Ellipse()
-                            .Stroke(Color.FromArgb("#2196F3")) // Canlı Mavi
+                             // Ön plan (Dolan Bar)
+                             new Ellipse()
+                            .Stroke(Color.FromArgb("#2196F3"))
                             .StrokeThickness(10)
-                            .StrokeDashArray(new double[] { 0, 100 }) // Başlangıçta boş
-                            .StrokeDashOffset(0)
+                            .Rotation(-90)
                             .CenterHorizontal()
-                            .CenterVertical())
-                            .Bind(Ellipse.StrokeDashArrayProperty, "SuTakibiVM.CurrentWater",
-                            convert: (double current) =>
-                            {
-                                double goal = 3000.0;
-                                double progress = (current / goal) * 10;
-                                if (progress > 10) progress = 10;
-                                if (progress < 0) progress = 0;
-                                return new DoubleCollection { progress, 100 };
-                            }), 
-
+                            .CenterVertical()
+                            .Bind(Ellipse.StrokeDashArrayProperty, "SuTakibiVM.WaterStrokeDashArray"),
                             // KATMAN 3: İçteki Beyaz Daire ve Yazılar
                             new Border()
                             {

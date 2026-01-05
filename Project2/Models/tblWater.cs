@@ -7,11 +7,11 @@ namespace Project2.Models;
 [Table("tblWater")]
 public class tblWater
 {
-    // SQL: PersonID INTEGER PRIMARY KEY
-    // 1-1 ilişki olduğu için AutoIncrement OLMAMALI. 
-    // Çünkü ID'yi tblPerson'dan alıp buraya aynen yazacağız.
-    [PrimaryKey]
-    public int PersonID { get; set; }
+    [PrimaryKey, AutoIncrement]
+    public int Id { get; set; }
+
+    // KRİTİK: Suyun hangi kullanıcıya ait olduğunu belirler
+    public int PersonId { get; set; }
 
     // SQL: WaterDrinkTime TEXT
     // SQLite ORM'i DateTime'ı otomatik olarak veritabanında saklayabilir.

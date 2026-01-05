@@ -3,7 +3,6 @@ using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Graphics;
-using Project2.Models;
 using Project2.Services;
 using Project2.WiewModels;
 
@@ -11,7 +10,7 @@ namespace Project2.Pages;
 
 public class MainDashboardPage : ContentPage
 {
-    private HorizontalStackLayout _actionButtonsPopup; // + butonuna basınca açılan küçük buton grubunu tutar
+    private HorizontalStackLayout _actionButtonsPopup;
 
     public MainDashboardPage()
     {
@@ -21,219 +20,262 @@ public class MainDashboardPage : ContentPage
         Content = new Grid()
         {
             Padding = new Thickness(20, 40, 20, 20),
-            RowDefinitions = // Sayfayı yatayda 4 satıra böldük
+            RowDefinitions =
             {
-                new RowDefinition(GridLength.Auto), // 0: Üst başlık
-                new RowDefinition(GridLength.Star), // 1: Boş içerik alanı
-                new RowDefinition(GridLength.Auto), // 2: + Menüsü
-                new RowDefinition(GridLength.Auto)  // 3: Alt navigasyon        // (AUTO) içeriği kadar yer , // (STAR) kalan tüm alan
+                new RowDefinition(GridLength.Auto), // 0: Üst Başlık
+                new RowDefinition(GridLength.Auto), // 1: Yatay Özet Kartları
+                new RowDefinition(GridLength.Star), // 2: Dikey Modül Listesi
+                new RowDefinition(GridLength.Auto), // 3: Hızlı İşlem Butonları (+ Menüsü)
+                new RowDefinition(GridLength.Auto)  // 4: Alt Navigasyon Bar
             },
             Children =
             {
-                // 0: ÜST BAŞLIK
+                // 1. ÜST BAŞLIK (Row 0)
                 new Grid()
                 {
-                    ColumnDefinitions = // Üst başlık satırını da 2 kolona böldük
-                    {
-                        new ColumnDefinition(GridLength.Star), // sol tarafa gelen yazı (kalan tüm alan)
-                        new ColumnDefinition(GridLength.Auto) // sağ tarafa gelen bildirim - ayarlar ikonu (içerik kadar alan)
-                    },
-
+                    ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) },
                     Children =
                     {
-                        new Label() 
-                            .Text($"Merhaba {UserSeassion.CurrentUser.Name};") // Karşılama yazısı. Varsayılan olarak sol kolana yazılır
+                         new Label()
+                            .Text($"Merhaba {UserSeassion.CurrentUser?.Name ?? "Misafir"};") // Karşılama yazısı. Varsayılan olarak sol kolana yazılır
                             .TextColor(Colors.White)
                             .FontSize(22)
                             .FontAttributes(FontAttributes.Bold)
                             .CenterVertical(),
-                            
+
                         new HorizontalStackLayout()
                         {
                             Spacing = 15,
-                            Children =
-                            {
-                                new Label()
-                                    .Text("🔔") // Bildirim iconu
-                                    .FontSize(22),
-
-                                new Label()
-                                    .Text("⚙️") // Ayarlar iconu
-                                    .FontSize(22)
-                                    .GestureRecognizers(new TapGestureRecognizer() // Label’ı buton gibi tıklanabilir yapar.
+                            Children = { new Label().Text("🔔").FontSize(22), 
+                            new Label()
+                            .Text("⚙️")
+                            .FontSize(22)
+                            .GestureRecognizers(new TapGestureRecognizer() // Label’ı buton gibi tıklanabilir yapar.
                                     {
                                         Command = new Command(async () => await Navigation.PushAsync(new ProfileEditPage()))
                                     }),
                             }
-                        }.Column(1) // Bildirim ve ayarlar iconu sağ kolona yerleşti.
+                        }.Column(1)
                     }
-                }.Row(0).Margin(new Thickness(0,0,0,20)), // Karşılama yazısını ve iconları ilk satıra yerleşir, alta 20 px boşluk ekle.
+                }.Row(0).Margin(new Thickness(0,0,0,20)),
 
-                // 1. BOŞ EKRAN GÖRÜNÜMÜ
+                // 2. YATAY ÖZET KARTLARI (Row 1)
+                new ScrollView()
+                {
+                    Orientation = ScrollOrientation.Horizontal,
+                    HorizontalScrollBarVisibility = ScrollBarVisibility.Never,
+                    Content = new HorizontalStackLayout()
+                    {
+                        Spacing = 15,
+                        Children =
+                        {
+                            CreateSummaryCard(
+                                "Su Hedefi",
+                                UserSeassion.CurrentlWater != null
+                                    ? $"{UserSeassion.CurrentlWater.WaterDrink} ml / {UserSeassion.CurrentlWater.WaterNeeded} ml"
+                                    : "Veri bekleniyor...",
+                                0.6),
+                            CreateSummaryCard("Günlük Harcama", "₺ 650 / ₺ 1000 harcandı", 0.65),
+                            CreateSummaryCard("İlaç Takibi", "1 / 2 İlaç Alındı\nSıradaki: Vitamin C", 0.5)
+                        }
+                    }
+                }.Row(1).Margin(new Thickness(0,0,0,30)),
+
+                // 3. DİKEY MODÜL LİSTESİ (Row 2)
                 new VerticalStackLayout()
                 {
-                    VerticalOptions = LayoutOptions.Center,
-                    Spacing = 20,
+                    Spacing = 15,
                     Children =
                     {
-                        new Label()
-                            .Text("📝")
-                            .FontSize(80)
-                            .CenterHorizontal(),
+                        // 1. SIRADA: Takvim - Dersler (Saatler güncellendi ve yer değiştirildi)
+                        CreateModuleRow("Takvim", "Bugünkü Dersler", "09:00 - 11:50 - Nesne Yönelimli Prog.\n12:00 - 13:50 - Veri Yapıları\n14:00 - 15:50 - Ekonomi\n12:00 - 13:50 - Ders 1\n12:00 - 13:50 - Ders 2\n12:00 - 13:50 - Ders 3"),
 
-                        new Label()
-                            .Text("Takip asistanın henüz boş.\nVeri ekleyerek asistanını canlandır!")
-                            .TextColor(Colors.Gray)
-                            .FontSize(18)
-                            .HorizontalTextAlignment(TextAlignment.Center) // Yazının kendisini yatayda ortalar 
-                            .Margin(new Thickness(20, 0))
+                        // 2. SIRADA: Takvim - Etkinlikler
+                        CreateModuleRow("Takvim", "Etkinlikler", "Matematik sınavına kalan gün: 7"),
+
+                        // 3. SIRADA: Bütçe
+                        CreateModuleRow("Bütçe", "Aylık Gelir / Gider", "Ayda Harcanan Para\n₺ 17000 / 30000", true)
                     }
-                }.Row(1), // 2.satıra yerleştir.
+                }.Row(2),
 
-                // 3. HIZLI İŞLEM BUTONLARI
+                // 4. HIZLI İŞLEM BUTONLARI (Row 3)
                 new HorizontalStackLayout()
                 {
                     HorizontalOptions = LayoutOptions.Center,
-                    Spacing = 15,
+                    Spacing = 20,
                     Margin = new Thickness(0, 20),
                     Children =
                     {
-                        // + BUTONU
                         new Border()
                         {
-                            StrokeShape = new Ellipse() // Daire şeklinde çerçeve
+                            StrokeShape = new Ellipse(),
+                            Stroke = Color.FromArgb("#00FF85"),
+                            StrokeThickness = 3,
+                            HeightRequest = 60,
+                            WidthRequest = 60,
+                            Content = new Label().Text("+").TextColor(Color.FromArgb("#00FF85")).FontSize(30).Center()
                         }
-                        .Stroke(Color.FromArgb("#00FF85")) // Yeşil kenarlık
-                        .StrokeThickness(3) // 3px kalınlık
-                        .HeightRequest(60) // Yükseklik 60px
-                        .WidthRequest(60) // Genişlik 60px
-                        .Content(
-                            new Label()
-                                .Text("+") // daire içine + yazımı
-                                .TextColor(Color.FromArgb("#00FF85")) // kenarlık ile aynı renk + sembolü
-                                .FontSize(30)
-                                .Center()
-                        )
-
-                        .GestureRecognizers(new TapGestureRecognizer() // + butonunu tıklanabilir yaptık
+                        .GestureRecognizers(new TapGestureRecognizer()
                         {
                             Command = new Command(() => {
-                                _actionButtonsPopup!.IsVisible = !_actionButtonsPopup.IsVisible; // Butona tıklandığında eğer buton gizli ise açar
-                            })                                                                  // Açık ise butonu gizler
+                                _actionButtonsPopup!.IsVisible = !_actionButtonsPopup.IsVisible;
+                            })
                         }),
 
-                        new HorizontalStackLayout() // + butonu içindeki elemanları tutan menü
+                        new HorizontalStackLayout()
                         {
                             Spacing = 15,
-                            IsVisible = false, // Sayfa ilk açıldığında + menüsü kapalı tıklayınca açılaca
+                            IsVisible = false,
                             Children =
                             {
                                 CreateActionButton("💰", "harcama ekle",nameof(MainDashboardPageWiewModel.GotoBillPageCommand)),
                                 CreateActionButton("💧", "Su ekle",nameof(MainDashboardPageWiewModel.GotoHealthPageCommand)),
-                            } 
-                        }.Assign(out _actionButtonsPopup) // Menü (HorizontalStackLayout) artık _actionButtonsPopup değişkenine bağlandı
-                    }
-                }.Row(2), // + butonunu 3. satıra yerleştirdik
-
-                // 4. ALT NAVİGASYON
-                new Border()
-                    .Stroke(Colors.White)
-                    .StrokeThickness(1)
-                    .Margin(new Thickness(-20, 0)) // Alt çerçeve kenarlara yapışması için -20 (çerçevenin dış boşluğu)
-                    .Padding(new Thickness(0, 10)) // Alt çerçeve ile içindeki grid arası mesafe (çerçevenin dış boşluğu) üst-alt 10px
-                    .Content(
-                        new Grid()
-                        {
-                            ColumnDefinitions = // Gridi 4 sütuna böldük her sütun alanı eşit
-                            {
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star),
-                                new ColumnDefinition(GridLength.Star)
-                            },
-                            Children =
-                            {
-                                CreateNavTab("🏠", "Ana Sayfa", 0,nameof(MainDashboardPageWiewModel.GotoMainPageCommand),true), // Bir alt navigasyon sekmesi oluşturur
-                                CreateNavTab("📅", "Takvim", 1,nameof(MainDashboardPageWiewModel.GotoCalendarPageCommand),false),          // İkon - Sekme ismi - Sütun yeri - Sekme aktif mi?
-                                CreateNavTab("💰", "Bütçe", 2,nameof(MainDashboardPageWiewModel.GotoBillPageCommand), false),
-                                CreateNavTab("❤️", "Sağlık", 3,nameof(MainDashboardPageWiewModel.GotoHealthPageCommand), false)
                             }
+                        }.Assign(out _actionButtonsPopup)
+                    }
+                }.Row(3),
+
+                // 5. ALT NAVİGASYON (Row 4)
+                new Border()
+                {
+                    Stroke = Colors.White,
+                    StrokeThickness = 1,
+                    Margin = new Thickness(-20, 0),
+                    Padding = new Thickness(0, 10),
+                    Content = new Grid()
+                    {
+                        ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star) },
+                        Children =
+                        {
+                            CreateNavTab("🏠", "Ana Sayfa", 0,nameof(MainDashboardPageWiewModel.GotoMainPageCommand),true),
+                            CreateNavTab("📅", "Takvim", 1,nameof(MainDashboardPageWiewModel.GotoCalendarPageCommand),false),
+                            CreateNavTab("💰", "Bütçe", 2,nameof(MainDashboardPageWiewModel.GotoBillPageCommand),false),
+                            CreateNavTab("❤️", "Sağlık", 3,nameof(MainDashboardPageWiewModel.GotoHealthPageCommand),false)
                         }
-                    ).Row(3) // 4.satıra yerleştir
+                    }
+                }.Row(4)
             }
         };
     }
-    // 3. Parametre olarak 'commandPath' ekledik
-    private View CreateActionButton(string icon, string text, string commandPath)
+
+    // --- YARDIMCI METOTLAR (CreateSummaryCard, CreateModuleRow, CreateActionButton, CreateNavTab) ---
+    // (Önceki metot kodları burada yer alır...)
+
+    private View CreateSummaryCard(string title, string info, double progress)
     {
-        // 1. Önce senin tasarımını bir değişkene atayalım
+        return new Border()
+        {
+            WidthRequest = 220,
+            HeightRequest = 130,
+            StrokeShape = new RoundRectangle() { CornerRadius = 20 },
+            Background = new LinearGradientBrush(new GradientStopCollection {
+                new GradientStop(Color.FromArgb("#2F58CD"), 0),
+                new GradientStop(Color.FromArgb("#AD49E1"), 1)
+            }, new Point(0, 0), new Point(1, 1)),
+            Content = new VerticalStackLayout()
+            {
+                Padding = 15,
+                Spacing = 5,
+                Children =
+                {
+                    new Label().Text("Bugünkü Özet").TextColor(Colors.White).FontSize(12),
+                    new Label().Text(title).TextColor(Colors.White).FontSize(16).FontAttributes(FontAttributes.Bold),
+                    new Label().Text(info).TextColor(Colors.White).FontSize(11),
+                    new ProgressBar().Progress(progress).ProgressColor(Colors.White).Margin(new Thickness(0,10,0,0))
+                }
+            }
+        };
+    }
+
+    private View CreateModuleRow(string title, string subTitle, string contentText, bool showProgress = false)
+    {
+        var layout = new VerticalStackLayout()
+        {
+            VerticalOptions = LayoutOptions.Center,
+            Children = {
+
+                new Label()
+                    .Text(contentText)
+                    .TextColor(Colors.White)
+                    .FontSize(13)
+                    .HorizontalTextAlignment(TextAlignment.Center)
+            }
+        };
+
+        if (showProgress)
+            layout.Children.Add(new ProgressBar().Progress(0.5).ProgressColor(Colors.Blue).Margin(new Thickness(0, 5, 0, 0)));
+
+        return new Border()
+        {
+            Stroke = Colors.White,
+            StrokeThickness = 1,
+            StrokeShape = new RoundRectangle() { CornerRadius = 15 },
+            Padding = 15,
+            Content = new Grid()
+            {
+                ColumnDefinitions = { new ColumnDefinition(GridLength.Auto), new ColumnDefinition(GridLength.Star) },
+                Children = {
+                    new VerticalStackLayout() {
+                        Children = {
+                            new Label().Text(title).TextColor(Colors.White).FontSize(18).FontAttributes(FontAttributes.Bold),
+                            new Label().Text(subTitle).TextColor(Colors.Gray).FontSize(10)
+                        }
+                    }.Column(0),
+                    layout.Column(1).CenterVertical()
+                }
+            }
+        };
+    }
+
+    // Parametre olarak 'commandName' eklendi
+    private View CreateActionButton(string icon, string text, string commandName)
+    {
         var layout = new VerticalStackLayout()
         {
             Spacing = 5,
             Children = {
-            new Border()
-            {
-                StrokeShape = new Ellipse()
-            }
-            .Stroke(Color.FromArgb("#00FF85"))
-            .HeightRequest(45)
-            .WidthRequest(45)
-            .Content(
-                new Label()
-                    .Text(icon)
-                    .Center()
-            ),
-            new Label()
-                .Text(text)
-                .TextColor(Colors.White)
-                .FontSize(10)
-                .CenterHorizontal()
+            new Border() {
+                HeightRequest = 45,
+                WidthRequest = 45,
+                StrokeShape = new Ellipse(),
+                Stroke = Color.FromArgb("#00FF85"),
+                Content = new Label().Text(icon).Center()
+            },
+            new Label().Text(text).TextColor(Colors.White).FontSize(10).CenterHorizontal()
         }
         };
 
-        // 2. Şimdi bu tasarıma "Tıklama Yeteneği" (Gesture) ekleyelim
-        var tapGesture = new TapGestureRecognizer();
-
-        // Command'i buraya bağlıyoruz (Button.CommandProperty DEĞİL, TapGestureRecognizer.CommandProperty)
-        tapGesture.Bind(TapGestureRecognizer.CommandProperty, commandPath);
-
-        // Oluşturduğumuz bu yeteneği tasarıma ekliyoruz
-        layout.GestureRecognizers.Add(tapGesture);
+        // Eğer bir komut ismi gönderildiyse, tıklama özelliği ekle ve bağla
+        if (!string.IsNullOrEmpty(commandName))
+        {
+            layout.GestureRecognizers.Add(new TapGestureRecognizer()
+                .Bind(TapGestureRecognizer.CommandProperty, commandName));
+        }
 
         return layout;
     }
 
-    // Parametrelerin arasına 'string commandPath' ekledik
-    private View CreateNavTab(string icon, string text, int col, string commandPath, bool isActive = false)
+    // Parametre olarak 'commandName' eklendi
+    private View CreateNavTab(string icon, string text, int col, string commandName, bool isActive = false)
     {
+        var color = isActive ? Colors.CornflowerBlue : Colors.White;
         var layout = new VerticalStackLayout()
         {
             Spacing = 2,
-            BackgroundColor = Colors.Transparent, // Tıklama alanı oluşsun diye
             Children = {
-            new Label()
-                .Text(icon)
-                .TextColor(isActive ? Colors.CornflowerBlue : Colors.White)
-                .FontSize(20)
-                .CenterHorizontal()
-                .InputTransparent(true), // 👈 EKLENECEK 1: Tıklamayı arkaya geçir
-
-            new Label()
-                .Text(text)
-                .TextColor(isActive ? Colors.CornflowerBlue : Colors.White)
-                .FontSize(10)
-                .CenterHorizontal()
-                .InputTransparent(true) // 👈 EKLENECEK 2: Tıklamayı arkaya geçir
+            new Label().Text(icon).TextColor(color).FontSize(20).CenterHorizontal(),
+            new Label().Text(text).TextColor(color).FontSize(10).CenterHorizontal()
         }
-        };
+        }.Column(col);
 
-        if (!string.IsNullOrEmpty(commandPath))
+        // Komut bağlama işlemi
+        if (!string.IsNullOrEmpty(commandName))
         {
-            var tapGesture = new TapGestureRecognizer();
-            tapGesture.Bind(TapGestureRecognizer.CommandProperty, commandPath);
-            layout.GestureRecognizers.Add(tapGesture);
+            layout.GestureRecognizers.Add(new TapGestureRecognizer()
+                .Bind(TapGestureRecognizer.CommandProperty, commandName));
         }
 
-        return layout.Column(col);
+        return layout;
     }
+
 }

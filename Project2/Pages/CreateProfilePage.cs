@@ -10,7 +10,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
 {
     public CreateProfilePage() // Sayfa oluşturulduğunda çalışan constructor’dır. UI elemanları burada oluşturulur.
     {
-        BindingContext = new CreateProfilePageWiew();
+        BindingContext = new CreateProfilePageView();
         this.BackgroundColor(Color.FromArgb("#23222E")); // Arka plan rengi.
 
         Content = new Grid() // Tüm ekranı bir ızgara gibi bölerek UI elemanlarını istediğimiz yerlere yerleştirmemizi sağlar.
@@ -58,10 +58,10 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                         },
 
                         // BOY (Entry)
-                        CreateInputGroup("Boy (m)",nameof(CreateProfilePageWiew.Height)), // Boy için Label,Border,Entry içeren elemanları oluşturur.
+                        CreateInputGroup("Boy (m)",nameof(CreateProfilePageView.Height)), // Boy için Label,Border,Entry içeren elemanları oluşturur.
                         
                         // KİLO (Entry)
-                        CreateInputGroup("Kilo (kg)",nameof(CreateProfilePageWiew.Weight)), // Kilo için Label,Border,Entry içeren elemanları oluşturur.
+                        CreateInputGroup("Kilo (kg)",nameof(CreateProfilePageView.Weight)), // Kilo için Label,Border,Entry içeren elemanları oluşturur.
 
                         // CİNSİYET BAŞLIĞI
                         new Label() // Etiket
@@ -82,23 +82,25 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                             ColumnSpacing = 20, // İki sütun arasına 20 piksel boşluk koyar
                             Children =  // Gridin içine UI elemanlarını (label,buton,border) eklemek için kullanılır.
                             {
-                                new Button() // Buton
-                                    .Text("Kadın") // Buton üzerinde Kadın yazısı.
-                                    .TextColor(Colors.White) // Yazı beyaz renk.
-                                    .BackgroundColor(Colors.Transparent) // Buton arka planı şeffaf.
-                                    .BorderColor(Colors.White) // Butonun çerçevesi beyaz.
-                                    .BorderWidth(1) // Çerçeve kalınlığı 1 px.
-                                    .Column(0) // Butonu Gridin 0. sutünuna yerleştirir.(sola)
-                                    .Bind(Button.CommandProperty, nameof(CreateProfilePageWiew.SelectFemaleCommand)),
+                                         new Button()
+                                        .Text("Kadın")
+                                        .TextColor(Colors.White)
+                                        .BorderColor(Colors.White)
+                                        .BorderWidth(1)
+                                        .Column(0)
+                                        // DOĞRU: Kadın butonu Kadın rengine ve komutuna bağlı
+                                        .Bind(Button.BackgroundColorProperty, "FemaleBtnColor")
+                                        .Bind(Button.CommandProperty, "SelectFemaleCommand"),
 
-                                new Button() // Buton
-                                    .Text("Erkek") // Buton üzerinde Erkek yazısı.
-                                    .TextColor(Colors.White) // Yazı beyaz renk.
-                                    .BackgroundColor(Colors.Transparent) // Buton arka planı şeffaf.
-                                    .BorderColor(Colors.White) // Butonun çerçevesi beyaz.
-                                    .BorderWidth(1) // Çerçeve kalınlığı 1 px.
-                                    .Column(1) // Butonu Gridin 1. sutünuna yerleştirir.(sağa)
-                                    .Bind(Button.CommandProperty, nameof(CreateProfilePageWiew.SelectMaleCommand)),
+                                          new Button()
+                                        .Text("Erkek")
+                                        .TextColor(Colors.White)
+                                        .BorderColor(Colors.White)
+                                        .BorderWidth(1)
+                                        .Column(1)
+                                        // DOĞRU: Erkek butonu Erkek rengine ve komutuna bağlı
+                                        .Bind(Button.BackgroundColorProperty, "MaleBtnColor")
+                                        .Bind(Button.CommandProperty, "SelectMaleCommand"),
                             }
                         },
 
@@ -122,7 +124,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                                     .BorderColor(Colors.White) // Beyaz kenarlık
                                     .BorderWidth(1) // İnce kenarlık
                                     .Column(0) // Butonu Gridin 0. sutünuna yerleştirir.(sola)
-                                    .Bind(Button.CommandProperty, nameof(CreateProfilePageWiew.ProfileCommand)),
+                                    .Bind(Button.CommandProperty, nameof(CreateProfilePageView.SelectSkipCommand)),
 
 
                                 new Button() // Buton
@@ -133,7 +135,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                                     .BorderColor(Colors.White) // Beyaz kenarlık
                                     .BorderWidth(1) // İnce kenarlık
                                     .Column(1) // Butonu Gridin 1. sutünuna yerleştirir.(sağa)
-                                    .Bind(Button.CommandProperty, nameof(CreateProfilePageWiew.ProfileCommand))
+                                    .Bind(Button.CommandProperty, nameof(CreateProfilePageView.ProfileCommand))
 
                             }
                         }
