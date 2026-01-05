@@ -100,4 +100,20 @@ public class AppDatabase
     {
         return _db.UpdateAsync(water);
     }
+
+    public async Task<tblWater?> GetWaterRecordByDateAsync(DateTime date)
+    {
+        await InitAsync();
+
+        // Sorgulanacak günün başlangıcını al (Örn: 05.01.2024 00:00:00)
+        var startOfDay = date.Date;
+        // Sorgulanacak günün sonunu al (Örn: 05.01.2024 23:59:59)
+        var endOfDay = startOfDay.AddDays(1);
+
+        // Veritabanında bu zaman aralığında olan ilk kaydı getir
+        return await _db.Table<tblWater>()
+                         .Where(x => x.Date >= startOfDay && x.Date < endOfDay)
+                         .FirstOrDefaultAsync();
+    }
+
 }

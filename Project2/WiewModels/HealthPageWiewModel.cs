@@ -30,7 +30,7 @@ namespace Project2.WiewModels
 
         public HealthPageWiewModel()
         {
-            // Alt ViewModel'i başlatıyoruz ki null hatası almayalım
+            // SuTakibiWiewModel'i burada açıyoruz.
             SuTakibiVM = new SuTakibiViewModel();
         }
 
@@ -47,7 +47,7 @@ namespace Project2.WiewModels
                 message: "Güncel kilonuzu giriniz:",
                 accept: "Güncelle",
                 cancel: "İptal",
-                placeholder: CurrentUser.Weight?.ToString() ?? "0", // Mevcut kiloyu ipucu göster
+                placeholder: CurrentUser.Weight?.ToString() ?? "CurrentUser.Weight", // Mevcut kiloyu ipucu göster
                 keyboard: Keyboard.Numeric); // Sadece sayı klavyesi aç
 
             // 3. Kullanıcı iptale bastıysa veya boş bıraktıysa çık

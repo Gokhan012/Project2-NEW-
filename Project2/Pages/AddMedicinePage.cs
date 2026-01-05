@@ -36,44 +36,35 @@ public class AddMedicinePage : ContentPage
                             .Margin(new Thickness(0, 0, 0, 10)),
 
                         // GİRİŞ ALANLARI
-                        CreateInputGroup("İlaç Adı", "IlacAdi"),
-                        CreateInputGroup("Dozaj (mg)", "Doz"),
+                        CreateInputGroup("İlaç Adı", "IlacAdi",Keyboard.Default),
+                        CreateInputGroup("Dozaj (mg)", "Doz",Keyboard.Numeric),
 
                         // SAAT SEÇİMİ
                         new VerticalStackLayout()
                         {
                             Spacing = 8,
-                            Children = {
+                            Children =
+                            {
                                 new Label()
                                     .Text("Alma Zamanı")
                                     .TextColor(Colors.White)
                                     .FontSize(14),
 
                                 new Border()
-                                    .Stroke(Colors.White)
-                                    .StrokeThickness(1)
-                                    .HeightRequest(45)
-                                    .Padding(new Thickness(10, 0))
-                                    .Content(
-                                        new Grid()
-                                        {
-                                            ColumnDefinitions =
-                                            {
-                                                new ColumnDefinition(GridLength.Star),
-                                                new ColumnDefinition(GridLength.Auto)
-                                            },
-                                            Children = {
-                                                new Entry()
-                                                    .Placeholder("09:00")
-                                                    .PlaceholderColor(Colors.Gray)
-                                                    .TextColor(Colors.White)
-                                                    .BackgroundColor(Colors.Transparent)
-                                                    .CenterVertical(),
-                                            }
-                                        }
-                                    )
+                                {
+                                    Stroke = Colors.White,
+                                    StrokeThickness = 1,
+                                    HeightRequest = 45,
+                                    Padding = new Thickness(10, 0),
+                                    Content = new TimePicker()
+                                        .TextColor(Colors.White)
+                                        .BackgroundColor(Colors.Transparent)
+                                        .Format("HH:mm")
+                                        .Bind(TimePicker.TimeProperty, "SecilenSaat", mode: BindingMode.TwoWay)
+                                }
                             }
                         },
+                        
 
                         // EKLE BUTONU
                         new Button()
@@ -95,7 +86,7 @@ public class AddMedicinePage : ContentPage
     }
 
     // Ortak Giriş Grubu Oluşturucu (Etiket + Border + Entry)
-    private View CreateInputGroup(string title, string bindingpath)
+    private View CreateInputGroup(string title, string bindingpath,Keyboard keyboard)
     {
         return new VerticalStackLayout()
         {
@@ -116,6 +107,7 @@ public class AddMedicinePage : ContentPage
                     .TextColor(Colors.White)
                     .BackgroundColor(Colors.Transparent)
                     .HeightRequest(45)
+                    .Keyboard(keyboard ?? Keyboard.Default)
                     .Bind(Entry.TextProperty, bindingpath, mode: BindingMode.TwoWay)
             }
         }

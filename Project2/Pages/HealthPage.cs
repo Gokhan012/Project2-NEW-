@@ -60,13 +60,12 @@ public class HealthPage : ContentPage
                             value: "0 kg",
                             subtitle: "Güncellemek için dokun",
                             col: 0,
-                            // 1. VERİ BAĞLANTISI (Doğru Yol)
+                            // 1. VERİ BAĞLANTISI 
                             valueBinding: new Binding("CurrentUser.Weight", stringFormat: "{0} kg")
                             {
                                 TargetNullValue = "0 kg",
                                 FallbackValue = "0 kg"
                             },
-                            // 2. TIKLAMA KOMUTU (Doğru İsim - String Olarak)
                             commandPath: "KgChancherCommand"
                         ),
                         CreateBmiCard().Column(1)
@@ -96,6 +95,7 @@ public class HealthPage : ContentPage
                                 new Ellipse()
                                     .Stroke(Color.FromArgb("#332196F3")) // Şeffaf mavi
                                     .StrokeThickness(10)
+                                    .StrokeDashOffset(0)
                                     .CenterHorizontal()
                                     .CenterVertical(),
 
@@ -201,7 +201,7 @@ public class HealthPage : ContentPage
                                 }
                             },
 
-                            // LİSTE GRUBU (Burası artık başlığın hemen altında)
+                            // LİSTE GRUBU 
                            new Grid()
 {
                                 Children =
@@ -229,7 +229,7 @@ public class HealthPage : ContentPage
                                 }
                             }
                         }
-                    }.Row(3), // SADECE BU ANA GRUP ROW 3'TE DURMALI
+                    }.Row(3), 
 
                     CreateBottomNav().Row(4)
             }
@@ -439,31 +439,31 @@ public class HealthPage : ContentPage
                     new Label().TextColor(Colors.LightGray).Margin(10,0).Bind(Label.TextProperty, "MedicineTime", stringFormat: "{0:HH:mm}").Column(1).CenterVertical(),
 
                     checkBorder.Column(2).CenterVertical().GestureRecognizers(new TapGestureRecognizer()
-                        .Bind(TapGestureRecognizer.CommandProperty, "ToggleMedicineCommand", source: this)//BindingContext vardı sildim
+                        .Bind(TapGestureRecognizer.CommandProperty, "ToggleMedicineCommand", source: this.BindingContext)//BindingContext vardı sildim
                         .Bind(TapGestureRecognizer.CommandParameterProperty, ".")),
 
                     new Label { Text = "🗑", TextColor = Colors.Red, FontSize = 20 }.Column(3).CenterVertical().Margin(10,0,0,0)//BindingContext vardı sildim
                         .GestureRecognizers(new TapGestureRecognizer()
-                        .Bind(TapGestureRecognizer.CommandProperty, "DeleteMedicineCommand", source: this)
-                        .Bind(TapGestureRecognizer.CommandParameterProperty, "."))
+                        .Bind(TapGestureRecognizer.CommandProperty, "DeleteMedicineCommand", source: this.BindingContext)
+                        .Bind(TapGestureRecognizer.CommandParameterProperty, "."))          
                 }
             }
         };
     }
 
-    // Sayfa her ekrana geldiğinde (Geri tuşuyla dönüldüğünde bile) çalışır
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
+                // Sayfa her ekrana geldiğinde çalışır
+                protected override async void OnAppearing()
+                {
+                    base.OnAppearing();
 
-        if (BindingContext is HealthPageWiewModel vm)
-        {
-            // 1. Kullanıcı oturum verilerini (Kilo vb.) yükle
-            vm.LoadUserData();
+                    if (BindingContext is HealthPageWiewModel vm)
+                    {
+                        // 1. Kullanıcı oturum verilerini (Kilo vb.) yükle
+                        vm.LoadUserData();
 
-            // 2. İlaç listesini veritabanından async olarak çek
-            // await kullanarak verilerin tam yüklendiğinden emin oluyoruz
-            await vm.LoadMedicines();
-        }
-    }
-}
+                        // 2. İlaç listesini veritabanından async olarak çek
+                        // await kullanarak verilerin tam yüklendiğinden emin oluyoruz
+                        await vm.LoadMedicines();
+                    }
+                }
+            }

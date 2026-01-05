@@ -58,7 +58,7 @@ public class CreateProfilePage : ContentPage // Profil oluşturma ekranı Conten
                         },
 
                         // BOY (Entry)
-                        CreateInputGroup("Boy (cm)",nameof(CreateProfilePageWiew.Height)), // Boy için Label,Border,Entry içeren elemanları oluşturur.
+                        CreateInputGroup("Boy (m)",nameof(CreateProfilePageWiew.Height)), // Boy için Label,Border,Entry içeren elemanları oluşturur.
                         
                         // KİLO (Entry)
                         CreateInputGroup("Kilo (kg)",nameof(CreateProfilePageWiew.Weight)), // Kilo için Label,Border,Entry içeren elemanları oluşturur.

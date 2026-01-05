@@ -37,49 +37,53 @@ namespace Project2.WiewModels
         {
             get
             {
-                double perimeter = 160 * Math.PI;
-                double ratio = TargetWater == 0 ? 0 : CurrentWater / TargetWater;
+                double ratio = TargetWater <= 0 ? 0 : (double)CurrentWater / TargetWater;
                 if (ratio > 1) ratio = 1;
-                double filled = perimeter * ratio;
-                double empty = perimeter - filled;
+                if (ratio < 0) ratio = 0;
+
+                // Çemberi 100 parçaya böldüğümüzü varsayalım
+                double filled = ratio * 100;
+                double empty = 100; // Boş kısmın 100 olması yeterlidir
+
                 return new DoubleCollection { filled, empty };
             }
         }
-
-        private async void Initialize()
+        private async Task Initialize() // async void yerine Task daha sağlıklıdır
         {
-            var record = await App.Database.GetFirstWaterRecordAsync();
+            // 1. Bugünün tarihine ait bir kayıt var mı bak (DatabaseService'e bu metodu eklemelisin)
+            var record = await App.Database.GetWaterRecordByDateAsync(DateTime.Now.Date);
 
             if (record != null)
             {
+                // Bugünün kaydı varsa onu kullan
                 currentwater = record;
-
-                // --- GÜN KONTROLÜ ---
-                // Eğer kayıtlı tarih bugünden farklıysa (yani eski bir günse)
-                if (currentwater.Date.Date != DateTime.Now.Date)
-                {
-                    currentwater.WaterDrink = 0;       // Suyu sıfırla
-                    currentwater.Date = DateTime.Now;  // Tarihi bugün yap
-
-                    // Sıfırlanmış halini veritabanına kaydet
-                    await App.Database.UpdateWaterAsync(currentwater);
-                }
-
-                // Değerleri ekrana yansıt
-                CurrentWater = currentwater.WaterDrink;
-                TargetWater = currentwater.WaterNeeded;
             }
             else
             {
-                // Kayıt hiç yoksa, bugünün tarihiyle yeni oluştur
+                // 2. Bugünün kaydı YOKSA, en son girilen hedefi bulalım (isteğe bağlı)
+                var lastRecord = await App.Database.GetFirstWaterRecordAsync(); // En son kaydı getirir
+                double lastTarget = lastRecord?.WaterNeeded ?? 2500;
+
+                // 3. YENİ BİR GÜN İÇİN YENİ SATIR OLUŞTUR
                 currentwater = new tblWater
                 {
                     WaterDrink = 0,
-                    WaterNeeded = 2500,
-                    Date = DateTime.Now // Bugünün tarihi
+                    WaterNeeded = lastTarget,
+                    Date = DateTime.Now.Date
                 };
+
+                // Veritabanına yeni satırı ekle (ID otomatik oluşur)
                 await App.Database.SaveWaterAsync(currentwater);
+
+                // Kayıt yapıldıktan sonra ID'nin dolması için tekrar çekebilirsin veya devam edebilirsin
             }
+
+            // Değerleri ekrana yansıt
+            CurrentWater = currentwater.WaterDrink;
+            TargetWater = currentwater.WaterNeeded;
+
+            // Hedef kontrolü
+            GoalReached = CurrentWater >= TargetWater;
         }
 
         // 3. Su Ekleme Komutu
