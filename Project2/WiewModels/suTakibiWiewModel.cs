@@ -65,7 +65,7 @@ namespace Project2.WiewModels
 
                 currentwater = new tblWater
                 {
-                    PersonId = currentPerson.ID,
+                    PersonId = UserSeassion.CurrentUser.ID,
                     WaterDrink = 0,
                     WaterNeeded = lastTarget,
                     Date = DateTime.Now.Date

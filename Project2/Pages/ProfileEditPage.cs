@@ -66,7 +66,7 @@ public class ProfileEditPage : ContentPage
                                     : CreateDatePickerGroup("Doğum Tarihi", "BirthDate"),
 
                                 // Boy ve Kilo: Her zaman güncellenebilir
-                                CreateInputGroup("Boy (cm)", "Örn: 185", "", true, Keyboard.Numeric, bindingPath: nameof(vm.Height)),
+                                CreateInputGroup("Boy (m)", "Örn: 185", "", true, Keyboard.Numeric, bindingPath: nameof(vm.Height)),
                                 CreateInputGroup("Kilo (kg)", "Örn: 75.5", "", true, Keyboard.Numeric, bindingPath: nameof(vm.Weight)),
 
                                 // Şifreler: ViewModel'deki NewPassword ve ConfirmPassword alanlarına bağlı

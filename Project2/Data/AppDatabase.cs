@@ -19,6 +19,8 @@ public class AppDatabase
         await _db.CreateTableAsync<Person>();
         await _db.CreateTableAsync<tblWater>();
         await _db.CreateTableAsync<tblMedicine>();
+        await _db.CreateTableAsync<tblBill>();
+        await _db.CreateTableAsync<tblBudget>();
         _initialized = true;
     }
 
@@ -121,6 +123,46 @@ public class AppDatabase
                          .Where(x => x.PersonId == personId)
                          .OrderByDescending(x => x.Date)
                          .FirstOrDefaultAsync();
+    }
+
+    // Gelir/Gider Ekleme veya Güncelleme Metodu
+    public Task<int> SaveBillAsync(tblBill bill)
+    {
+        if (bill.Id != 0)
+            return _db.UpdateAsync(bill);
+        else
+            return _db.InsertAsync(bill);
+    }
+
+    // Faturaları Çekmek İçin (İleride lazım olacak)
+    public Task<List<tblBill>> GetUnpaidBillsAsync(int userId)
+    {
+        return _db.Table<tblBill>()
+                          .Where(x => x.UserId == userId && x.IsPaid == false)
+                          .ToListAsync();
+    }
+
+    public async Task<List<tblBudget>> GetAllBudgetsAsync()
+    {
+        await InitAsync();
+        // Tarihe göre sıralı getir (En yeni en üstte)
+        return await _db.Table<tblBudget>().OrderByDescending(x => x.Date).ToListAsync();
+    }
+
+    public async Task<int> SaveBudgetAsync(tblBudget budget)
+    {
+        await InitAsync();
+
+        // Eğer ID'si 0 değilse, demek ki bu kayıt zaten var, GÜNCELLE.
+        if (budget.Id != 0)
+        {
+            return await _db.UpdateAsync(budget);
+        }
+        // Eğer ID'si 0 ise, bu yeni bir kayıttır, EKLE.
+        else
+        {
+            return await _db.InsertAsync(budget);
+        }
     }
 
 }

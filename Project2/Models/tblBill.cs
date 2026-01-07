@@ -1,27 +1,17 @@
 ﻿using SQLite;
-using System;
 
-namespace Project2.Models;
-
-[Table("tblBill")]
-public class tblBill
+namespace Project2.Models
 {
-    // BillID INTEGER PRIMARY KEY AUTOINCREMENT
-    [PrimaryKey, AutoIncrement]
-    public int BillID { get; set; }
+    public class tblBill
+    {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
 
-    // PersonID INTEGER NOT NULL
-    // Kişiye ait faturaları hızlı listelemek için [Indexed] ekledik.
-    [Indexed]
-    public int PersonID { get; set; }
-
-    // BillName TEXT
-    public string BillName { get; set; }
-
-    // BillPrice REAL
-    public double BillPrice { get; set; }
-
-    // BillPaymentDay TEXT
-    // Veritabanında TEXT saklanır, kodda DateTime kullanılır.
-    public DateTime BillPaymentDay { get; set; }
+        public string Title { get; set; }       // Fatura Adı (Elektrik, Netflix vb.)
+        public double Amount { get; set; }      // Tutar
+        public DateTime DueDate { get; set; }   // Son Ödeme Tarihi
+        public string Category { get; set; }    // Kategori (Fatura, Kira vb.)
+        public bool IsPaid { get; set; }        // Ödendi mi? (Varsayılan Hayır)
+        public int UserId { get; set; }         // Hangi kullanıcıya ait?
+    }
 }

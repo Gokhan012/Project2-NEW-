@@ -9,9 +9,9 @@ namespace Project2.Services
         {
             // Name / Surname trim > 0
             if (string.IsNullOrWhiteSpace(p.Name))
-                throw new ArgumentException("Name boş olamaz.");
+                throw new ArgumentException("İsim boş olamaz.");
             if (string.IsNullOrWhiteSpace(p.Surname))
-                throw new ArgumentException("Surname boş olamaz.");
+                throw new ArgumentException("Soyad boş olamaz.");
 
             // Age 0..100
             if (p.Age < 0 || p.Age > 100)

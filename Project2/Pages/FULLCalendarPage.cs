@@ -40,6 +40,7 @@ public class FULLCalendarPage : ContentPage
                             Children = {
                                 new Label().Text("🔍").FontSize(22).VerticalOptions(LayoutOptions.Center).TextColor(Colors.White),
                                 new Label().Text("+").TextColor(_ozelYesil).FontSize(30).FontAttributes(FontAttributes.Bold).VerticalOptions(LayoutOptions.Center)
+                                .GestureRecognizers(new TapGestureRecognizer().Command(new Command(async () => await Navigation.PushAsync(new AddCalendarEventPage()))))
                             }
                         }.Column(1)
                     }
@@ -104,10 +105,10 @@ public class FULLCalendarPage : ContentPage
                     Content = new Grid() {
                         ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star) },
                         Children = {
-                            CreateNavTab("🏠", "Ana Sayfa", 0),
-                            CreateNavTab("📅", "Takvim", 1, true),
-                            CreateNavTab("💰", "Bütçe", 2),
-                            CreateNavTab("❤️", "Sağlık", 3)
+                            CreateNavTab("🏠", "Ana Sayfa", 0).GestureRecognizers(new TapGestureRecognizer() { Command = new Command(async () => await Navigation.PushAsync(new MainDashboardPage())) }),
+                                CreateNavTab("📅", "Takvim", 1, true),
+                                CreateNavTab("💰", "Bütçe", 2).GestureRecognizers(new TapGestureRecognizer() { Command = new Command(async () => await Navigation.PushAsync(new BudgetPage())) }),
+                                CreateNavTab("❤️", "Sağlık", 3).GestureRecognizers(new TapGestureRecognizer() { Command = new Command(async () => await Navigation.PushAsync(new HealthPage())) }),
                         }
                     }
                 }.Row(4).VerticalOptions(LayoutOptions.End)

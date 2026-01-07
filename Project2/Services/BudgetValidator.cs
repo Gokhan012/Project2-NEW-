@@ -5,18 +5,29 @@ namespace Project2.Services
 {
     public static class BudgetValidator
     {
-        public static void Validate(tblBudget b)
+        // Parametre olarak tblBill alıyoruz
+        public static void Validate(tblBill b)
         {
-            // Bütçe limiti negatif olamaz
-            if (b.BudgetLimit < 0)
+            // 1. Tutar Kontrolü
+            if (b.Amount < 0)
             {
-                throw new ArgumentException("Bütçe limiti negatif olamaz.");
+                throw new ArgumentException("Tutar negatif olamaz.");
             }
 
-            // PersonID kontrolü
-            if (b.PersonID <= 0)
+            // 2. KULLANICI KONTROLÜ (DÜZELTİLEN KISIM)
+            // b.Id veritabanına henüz kaydedilmemiş yeni kayıtlarda 0'dır.
+            // Bu yüzden b.Id'yi kontrol edersen yeni kayıt ekleyemezsin.
+            // Bunun yerine faturanın kime ait olduğunu (UserId) kontrol etmeliyiz.
+
+            if (b.UserId <= 0) // <-- Burası 'Id' değil 'UserId' olmalı
             {
-                throw new ArgumentException("Bütçe bir kişiye atanmalıdır.");
+                throw new ArgumentException("Kayıt bir kullanıcıya atanmalıdır (UserId eksik).");
+            }
+
+            // 3. Başlık Kontrolü
+            if (string.IsNullOrWhiteSpace(b.Title))
+            {
+                throw new ArgumentException("Açıklama veya başlık boş olamaz.");
             }
         }
     }

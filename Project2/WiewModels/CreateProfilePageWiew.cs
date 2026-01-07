@@ -77,7 +77,7 @@ namespace Project2.WiewModels
                 await App.Database.UpdatePersonAsync(currentuser);
 
                 // 5. Başarılı Mesajı ve Navigasyon
-                await Application.Current.MainPage.DisplayAlert("Başarılı", $"Profiliniz oluşturuldu! (Yaş: {age})", "Tamam");
+                await Application.Current.MainPage.DisplayAlert("Başarılı", $"Profiliniz oluşturuldu!", "Tamam");
                 await Application.Current.MainPage.Navigation.PushAsync(new MainDashboardPage());
             }
             catch (ArgumentException ex)
