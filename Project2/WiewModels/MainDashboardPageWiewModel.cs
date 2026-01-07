@@ -74,4 +74,13 @@ partial class MainDashboardPageWiewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    public async Task GotoAddBudgetPage()
+    {
+        if (Application.Current.MainPage is not null)
+        {
+            await Application.Current.MainPage.Navigation.PushAsync(new Project2.Pages.AddBudgetPage());
+        }
+    }
+
 }

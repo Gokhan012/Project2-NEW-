@@ -129,66 +129,71 @@ public class MainDashboardPage : ContentPage
         // --- TASARIM ---
         return new Grid()
         {
-            Padding = new Thickness(20, 40, 20, 20),
             RowDefinitions =
             {
-                new RowDefinition(GridLength.Auto),
-                new RowDefinition(GridLength.Auto),
-                new RowDefinition(GridLength.Star),
-                new RowDefinition(GridLength.Auto),
-                new RowDefinition(GridLength.Auto)
+                new RowDefinition(GridLength.Star), // Satır 0: İçerik
+                new RowDefinition(GridLength.Auto)  // Satır 1: Alt Bar
             },
             Children =
             {
-                // 1. ÜST BAŞLIK
-                new Grid()
+                new ScrollView()
                 {
-                    ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) },
-                    Children =
+                    Content = new VerticalStackLayout()
                     {
-                         new Label()
-                            .Text($"Merhaba {UserSeassion.CurrentUser?.Name ?? "Misafir"};")
-                            .TextColor(Colors.White)
-                            .FontSize(22)
-                            .FontAttributes(FontAttributes.Bold)
-                            .CenterVertical(),
-
-                        new HorizontalStackLayout()
+                        Padding = new Thickness(20, 40, 20, 100), // Butonun arkada kalmaması için alt padding artırıldı
+                        Spacing = 25,
+                        Children =
                         {
-                            Spacing = 15,
-                            Children = {
-                                new Label().Text("🔔").FontSize(22),
-                                new Label()
-                                    .Text("⚙️")
+                            new Grid()
+                            {
+                                ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Auto) },
+                                Children =
+                                {
+                                    new Label()
+                                    .Text($"Merhaba {UserSeassion.CurrentUser?.Name ?? "Misafir"};")
+                                    .TextColor(Colors.White)
                                     .FontSize(22)
-                                    .GestureRecognizers(new TapGestureRecognizer()
-                                    {
-                                        Command = new Command(async () => await Navigation.PushAsync(new ProfileEditPage()))
-                                    }),
-                            }
-                        }.Column(1)
-                    }
-                }.Row(0).Margin(new Thickness(0,0,0,20)),
+                                    .FontAttributes(FontAttributes.Bold)
+                                    .CenterVertical(),
 
+                                    new HorizontalStackLayout()
+                                    {
+                                    Spacing = 15,
+                                    Children = {
+                                        new Label().Text("🔔").FontSize(22),
+                                        new Label()
+                                        .Text("⚙️")
+                                        .FontSize(22)
+                                        .GestureRecognizers(new TapGestureRecognizer()
+                                        {
+                                            Command = new Command(async () => await Navigation.PushAsync(new ProfileEditPage()))
+                                        }),
+                                    }
+                                    }.Column(1)
+                                }
+                            },
+                
                 // 2. KARTLAR
-                new Grid()
+                new ScrollView()
                 {
-                    ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star) },
-                    RowDefinitions = { new RowDefinition(GridLength.Auto), new RowDefinition(GridLength.Auto) },
-                    ColumnSpacing = 15,
-                    RowSpacing = 15,
-                    Children =
+                    Orientation = ScrollOrientation.Horizontal,
+                    HorizontalScrollBarVisibility = ScrollBarVisibility.Never,
+                    Content = new HorizontalStackLayout()
                     {
+                        Spacing = 15,
+                        Children =
+                        {
                         // SU KARTI
-                        CreateSummaryCard("Su Hedefi", $"{waterDrank:N0} ml\n{waterTarget:N0} ml", waterProgress).Row(0).Column(0),
+                        CreateSummaryCard("Su Hedefi", $"{waterDrank:N0} ml\n{waterTarget:N0} ml", waterProgress),
                         
                         // BÜTÇE KARTI
-                        CreateSummaryCard("Bütçe Durumu", $"{currentExpense:N0} TL / {userLimit:N0} TL", budgetProgress).Row(0).Column(1),
+                        CreateSummaryCard("Bütçe Durumu", $"{currentExpense:N0} TL / {userLimit:N0} TL", budgetProgress),
                         
                         // İLAÇ KARTI
-                        CreateSummaryCard("İlaç Takibi", medInfoText.Trim(), medProgress).Row(1).Column(0).ColumnSpan(2)
+                        CreateSummaryCard("İlaç Takibi", medInfoText.Trim(), medProgress)
+                        }
                     }
-                }.Row(1).Margin(new Thickness(0, 0, 0, 30)),
+                },
 
                 // 3. LİSTE (SADECE BÜTÇE KALDIRILDI)
                 new VerticalStackLayout()
@@ -196,18 +201,22 @@ public class MainDashboardPage : ContentPage
                     Spacing = 15,
                     Children =
                     {
-                        CreateModuleRow("Takvim", "Bugünkü Dersler", "09:00 - 11:50 - Nesne Yönelimli Prog.\n12:00 - 13:50 - Veri Yapıları"),
+                        CreateModuleRow("Takvim", "Bugünkü Dersler", "09:00 - 11:50 - Nesne Yönelimli Prog.\n12:00 - 13:50 - Veri Yapıları\n14:00 - 16:50 - İşletim Sistemleri"),
                         CreateModuleRow("Takvim", "Etkinlikler", "Matematik sınavına kalan gün: 7"),
                         // Bütçe satırı buradan silindi.
                     }
-                }.Row(2),
+                }
+            }
+                    }
+                }.Row(0),
 
                 // 4. FAB BUTON
                 new HorizontalStackLayout()
                 {
                     HorizontalOptions = LayoutOptions.Center,
-                    Spacing = 20,
-                    Margin = new Thickness(0, 20),
+                    VerticalOptions = LayoutOptions.End,
+                    Spacing = 15,
+                    Margin = new Thickness(0, 0, 0, 20), // Alt barın biraz üzerinde durması için
                     Children =
                     {
                         new Border()
@@ -225,17 +234,17 @@ public class MainDashboardPage : ContentPage
                             Spacing = 15, IsVisible = false,
                             Children =
                             {
-                                CreateActionButton("💰", "fatura ekle", nameof(MainDashboardPageWiewModel.GotoBillPageCommand)),
+                                CreateActionButton("💰", "harcama ekle", nameof(MainDashboardPageWiewModel.GotoAddBudgetPageCommand)),
                                 CreateActionButton("💧", "Su ekle", nameof(MainDashboardPageWiewModel.GotoHealthPageCommand)),
                             }
                         }.Assign(out _actionButtonsPopup)
                     }
-                }.Row(3),
+                }.Row(0).ZIndex(1), // Row 0 içinde en üstte (overlay) durmasını sağlar
 
                 // 5. NAVBAR
                 new Border()
                 {
-                    Stroke = Colors.White, StrokeThickness = 1, Margin = new Thickness(-20, 0), Padding = new Thickness(0, 10),
+                    Stroke = Colors.White, StrokeThickness = 1, Margin = new Thickness(10, 0, 10, 20), Padding = new Thickness(0, 10),
                     Content = new Grid()
                     {
                         ColumnDefinitions = { new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star) },
