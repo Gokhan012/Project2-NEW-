@@ -18,40 +18,91 @@ public class AddBillPage : ContentPage
         Content = new Grid()
         {
             Padding = new Thickness(20, 40, 20, 20),
-            RowDefinitions = { new RowDefinition(GridLength.Star) },
+            RowDefinitions =
+            {
+                new RowDefinition(GridLength.Star), // 0: Form içeriği (Kalan alanı kaplar)
+                new RowDefinition(GridLength.Auto)  // 1: Alt Navigasyon (İçeriği kadar)
+            },
             Children =
             {
+                // FORM İÇERİĞİ
                 new VerticalStackLayout()
                 {
                     Spacing = 18,
                     Padding = new Thickness(10, 0, 10, 0),
                     Children =
                     {
-                        // BAŞLIK
-                        new Label().Text("Fatura Ekle").TextColor(Colors.White).FontSize(24).FontAttributes(FontAttributes.Bold).Margin(0, 0, 0, 10),
+                        // SAYFA BAŞLIĞI
+                        new Label()
+                            .Text("Gelir / Gider Ekle")
+                            .TextColor(Colors.White)
+                            .FontSize(24)
+                            .FontAttributes(FontAttributes.Bold)
+                            .Margin(new Thickness(0, 0, 0, 10)),
 
-                        // KATEGORİLER
+                        // İŞLEM TİPİ SEÇİMİ (Gelir / Gider) DEĞİŞTİRİLEMEZ
                         new VerticalStackLayout()
                         {
                             Spacing = 8,
                             Children = {
-                                new Label().Text("Kategori").TextColor(Colors.White).FontSize(16),
+                                new Label()
+                                    .Text("İşlem Tipi")
+                                    .TextColor(Colors.White)
+                                    .FontSize(16),
+                                new HorizontalStackLayout()
+                                {
+                                    Spacing = 25,
+                                    InputTransparent = true,
+                                    Children = {
+                                        new RadioButton()
+                                        {
+                                            Content = "Gelir"
+                                        }
+                                            .TextColor(Colors.White)
+                                            .BackgroundColor(Colors.Transparent)
+                                            .BorderColor(Colors.Transparent),
+                                        new RadioButton()
+                                        {
+                                            Content = "Gider",
+                                            IsChecked = true
+                                        }
+                                            .TextColor(Colors.White)
+                                            .BackgroundColor(Colors.Transparent)
+                                            .BorderColor(Colors.Transparent)
+                                    }
+                                }
+                            }
+                        },
+
+                        // KATEGORİLER (Market, Kira, Fatura, Diğer) DEĞİŞTİRİLEMEZ
+                        new VerticalStackLayout()
+                        {
+                            Spacing = 8,
+                            Children = {
+                                new Label()
+                                    .Text("Kategoriler")
+                                    .TextColor(Colors.White)
+                                    .FontSize(16),
                                 new Grid()
                                 {
                                     ColumnDefinitions = {
-                                        new ColumnDefinition(GridLength.Auto), new ColumnDefinition(GridLength.Auto),
-                                        new ColumnDefinition(GridLength.Auto), new ColumnDefinition(GridLength.Auto)
+                                        new ColumnDefinition(GridLength.Auto),
+                                        new ColumnDefinition(GridLength.Auto),
+                                        new ColumnDefinition(GridLength.Auto),
+                                        new ColumnDefinition(GridLength.Auto)
                                     },
                                     ColumnSpacing = 10,
+                                    InputTransparent = true,
                                     Children = {
-                                        CreateCategoryRadioButton("Fatura", true, 0),
+                                        CreateCategoryRadioButton("Market", false, 0),
                                         CreateCategoryRadioButton("Kira", false, 1),
-                                        CreateCategoryRadioButton("Aidat", false, 2),
+                                        CreateCategoryRadioButton("Fatura", true, 2),
                                         CreateCategoryRadioButton("Diğer", false, 3)
                                     }
                                 }
                             }
                         },
+
 
                         // KURUM ADI (Title'a bağlandı)
                         CreateInputGroup("Kurum Adı", nameof(AddBillPageViewModel.Title)),
