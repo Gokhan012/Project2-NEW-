@@ -221,7 +221,7 @@ new Border()
                             },
                             Children = {
                                 CreateNavTab("🏠", "Ana Sayfa", 0).GestureRecognizers(new TapGestureRecognizer(){ Command = new Command(async () => await Navigation.PushAsync(new MainDashboardPage())) }),
-                                CreateNavTab("📅", "Takvim", 1).GestureRecognizers(new TapGestureRecognizer(){ Command = new Command(async () => await Navigation.PushAsync(new CalendarMainPage())) }),
+                                CreateNavTab("📅", "Takvim", 1).GestureRecognizers(new TapGestureRecognizer(){ Command = new Command(async () => await Navigation.PushAsync(new FULLCalendarPage())) }),
                                 CreateNavTab("💰", "Bütçe", 2, true),
                                 CreateNavTab("❤️", "Sağlık", 3).GestureRecognizers(new TapGestureRecognizer(){ Command = new Command(async () => await Navigation.PushAsync(new HealthPage())) }),
                             }

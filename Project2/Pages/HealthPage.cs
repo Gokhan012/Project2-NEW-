@@ -358,7 +358,7 @@ public class HealthPage : ContentPage
                     CreateNavTab("📅", "Takvim", 1)
                     .GestureRecognizers(new TapGestureRecognizer()
                     {
-                        Command = new Command(async () => await Navigation.PushAsync(new CalendarMainPage()))
+                        Command = new Command(async () => await Navigation.PushAsync(new FULLCalendarPage()))
                     }),
                     CreateNavTab("💰", "Bütçe", 2)
                     .GestureRecognizers(new TapGestureRecognizer()
